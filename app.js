@@ -1355,16 +1355,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-stats-to-config').addEventListener('click',   () => goTo('index.html'));
         document.getElementById('btn-reset-stats').addEventListener('click',       () => Stats.reset());
 
-        // Exportar Excel
-        document.getElementById('btn-download-excel').addEventListener('click', () => {
-            try {
-                Stats.generateExcel();
-            } catch (err) {
-                console.error("Erro ao exportar Excel:", err);
-                alert("Ocorreu um erro ao gerar a planilha. Tente novamente.");
-            }
-        });
-
         // Enviar por Email
         document.getElementById('btn-send-email').addEventListener('click', () => {
             const emailInput = document.getElementById('input-email-recipient');
