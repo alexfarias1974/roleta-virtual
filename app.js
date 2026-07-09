@@ -1066,6 +1066,125 @@ const Stats = {
         const config = Storage.loadConfig();
         this._render(Storage._emptyStats(), config);
     },
+
+    generateExcel() {
+        const stats = Storage.loadStats();
+        const config = Storage.loadConfig();
+        const today = todayStr();
+
+        // 1. Resumo Sheet
+        const summaryData = [
+            ["Métrica", "Valor"],
+            ["Total de Sorteios Realizados", stats.totalSpins || 0],
+            ["Data do Relatório", new Date().toLocaleString("pt-BR")],
+            ["Duração da Animação (segundos)", config.spinDuration || 5],
+            ["Quantidade de Prêmios Configurados", config.prizes.length]
+        ];
+        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+
+        // 2. Prêmios Sheet
+        const prizesData = [
+            ["ID", "Nome do Prêmio", "Cor (HEX)", "Quantidade de Sorteios", "Porcentagem (%)"]
+        ];
+        config.prizes.forEach((prize, idx) => {
+            const count = stats.prizeCounts[prize.name] || 0;
+            const pct = stats.totalSpins > 0 ? ((count / stats.totalSpins) * 100).toFixed(2) : 0;
+            prizesData.push([
+                idx + 1,
+                prize.name,
+                prize.color,
+                count,
+                parseFloat(pct)
+            ]);
+        });
+        const wsPrizes = XLSX.utils.aoa_to_sheet(prizesData);
+
+        // 3. Por Hora Sheet (Hoje)
+        const hourData = [
+            ["Hora", "Quantidade de Sorteios"]
+        ];
+        for (let i = 0; i < 24; i++) {
+            const hourKey = `${today}T${pad(i)}`;
+            const count = stats.spinsByHour[hourKey] || 0;
+            hourData.push([`${pad(i)}:00`, count]);
+        }
+        const wsHour = XLSX.utils.aoa_to_sheet(hourData);
+
+        // 4. Por Dia Sheet (Histórico)
+        const dayData = [
+            ["Data", "Quantidade de Sorteios"]
+        ];
+        const sortedDays = Object.keys(stats.spinsByDay || {}).sort();
+        sortedDays.forEach(day => {
+            dayData.push([day, stats.spinsByDay[day]]);
+        });
+        if (sortedDays.length === 0) {
+            dayData.push(["Nenhum registro", 0]);
+        }
+        const wsDay = XLSX.utils.aoa_to_sheet(dayData);
+
+        // Criar pasta de trabalho (Workbook)
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsSummary, "Resumo");
+        XLSX.utils.book_append_sheet(wb, wsPrizes, "Prêmios");
+        XLSX.utils.book_append_sheet(wb, wsHour, "Por Hora (Hoje)");
+        XLSX.utils.book_append_sheet(wb, wsDay, "Por Dia (Histórico)");
+
+        // Gerar arquivo e baixar
+        const fileName = `Estatisticas_Roleta_${today}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        return { fileName, stats, config };
+    },
+
+    sendEmail(recipient) {
+        if (!recipient) {
+            alert("Por favor, informe um endereço de e-mail.");
+            return;
+        }
+
+        // Primeiro, gera e baixa a planilha automaticamente
+        const { fileName, stats, config } = this.generateExcel();
+
+        // Constrói o corpo do e-mail com o resumo formatado em texto
+        const today = new Date().toLocaleDateString("pt-BR");
+        const subject = encodeURIComponent(`Relatório de Estatísticas - Roleta Virtual - ${today}`);
+
+        let bodyText = `Olá,\n\n`;
+        bodyText += `Segue o resumo das estatísticas da Roleta Virtual gerado em ${new Date().toLocaleString("pt-BR")}:\n\n`;
+        bodyText += `--------------------------------------------------\n`;
+        bodyText += `📊 RESUMO GERAL\n`;
+        bodyText += `--------------------------------------------------\n`;
+        bodyText += `Total de Sorteios: ${stats.totalSpins || 0}\n`;
+        bodyText += `Prêmios Configurados: ${config.prizes.length}\n\n`;
+
+        bodyText += `--------------------------------------------------\n`;
+        bodyText += `🎁 RESULTADOS POR PRÊMIO\n`;
+        bodyText += `--------------------------------------------------\n`;
+        config.prizes.forEach((prize) => {
+            const count = stats.prizeCounts[prize.name] || 0;
+            const pct = stats.totalSpins > 0 ? ((count / stats.totalSpins) * 100).toFixed(1) : 0;
+            bodyText += `- ${prize.name}: ${count} sorteios (${pct}%)\n`;
+        });
+        bodyText += `\n`;
+        bodyText += `*Nota: A planilha detalhada "${fileName}" foi gerada e baixada no seu dispositivo. Por favor, lembre-se de anexá-la a este e-mail antes de enviá-lo.*\n\n`;
+        bodyText += `Atenciosamente,\nSistema de Roleta Virtual`;
+
+        const body = encodeURIComponent(bodyText);
+
+        // Abrir mailto
+        window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+        
+        // Exibir feedback na UI
+        const feedbackEl = document.getElementById("export-feedback");
+        if (feedbackEl) {
+            feedbackEl.textContent = `Planilha "${fileName}" gerada! O cliente de e-mail foi aberto. Anexe o arquivo baixado antes de enviar.`;
+            feedbackEl.className = "export-feedback success";
+            feedbackEl.classList.remove("hidden");
+            setTimeout(() => {
+                feedbackEl.classList.add("hidden");
+            }, 8000);
+        }
+    }
 };
 
 // ══════════════════════════════════════════
@@ -1109,6 +1228,39 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn-stats-to-roulette').addEventListener('click', () => goTo('roleta.html'));
         document.getElementById('btn-stats-to-config').addEventListener('click',   () => goTo('index.html'));
         document.getElementById('btn-reset-stats').addEventListener('click',       () => Stats.reset());
+
+        // Exportar Excel
+        document.getElementById('btn-download-excel').addEventListener('click', () => {
+            try {
+                Stats.generateExcel();
+            } catch (err) {
+                console.error("Erro ao exportar Excel:", err);
+                alert("Ocorreu um erro ao gerar a planilha. Tente novamente.");
+            }
+        });
+
+        // Enviar por Email
+        document.getElementById('btn-send-email').addEventListener('click', () => {
+            const emailInput = document.getElementById('input-email-recipient');
+            const email = emailInput.value.trim();
+            if (!email) {
+                alert("Por favor, preencha o e-mail do destinatário.");
+                emailInput.focus();
+                return;
+            }
+            // Simples validação de e-mail
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert("Por favor, insira um e-mail válido.");
+                emailInput.focus();
+                return;
+            }
+            try {
+                Stats.sendEmail(email);
+            } catch (err) {
+                console.error("Erro ao enviar e-mail:", err);
+                alert("Ocorreu um erro ao preparar o e-mail.");
+            }
+        });
     }
 
     console.log(`[Roleta Virtual] Página "${page}" inicializada. ✓`);

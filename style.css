@@ -1290,3 +1290,198 @@ body {
 ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
 ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.5); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+/* ══════════════════════════════════════════
+   SEÇÃO DE EXPORTAÇÃO
+   ══════════════════════════════════════════ */
+.export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 44px 48px;
+    margin-bottom: 60px;
+}
+
+.export-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.export-grid {
+    display: flex;
+    gap: 40px;
+    align-items: stretch;
+    margin-top: 10px;
+}
+
+.export-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--r-lg);
+    padding: 40px 30px;
+    transition: var(--ease);
+}
+
+.export-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(124, 58, 237, 0.3);
+    transform: translateY(-4px);
+}
+
+.export-card-icon {
+    font-size: 3rem;
+    margin-bottom: 18px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+}
+
+.export-card-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.export-card-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 30px;
+    flex-grow: 1;
+}
+
+.btn-export {
+    width: 100%;
+    max-width: 320px;
+    padding: 18px 24px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: var(--r-md);
+    cursor: pointer;
+}
+
+/* Divisor Visual */
+.export-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.divider-line {
+    width: 1px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.divider-or {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* E-mail Input Group */
+.email-input-group {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 16px;
+}
+
+.email-input {
+    width: 100%;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding: 16px 20px !important;
+    font-size: 1rem !important;
+    border-radius: var(--r-md) !important;
+    color: white !important;
+}
+
+.email-input:focus {
+    border-color: var(--accent-purple) !important;
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.3) !important;
+}
+
+.btn-export-email {
+    background: linear-gradient(135deg, var(--accent-purple) 0%, #4f46e5 100%);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.btn-export-email:hover {
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+}
+
+.export-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 14px;
+    line-height: 1.4;
+    max-width: 280px;
+}
+
+/* Feedback Box */
+.export-feedback {
+    margin-top: 24px;
+    padding: 18px 24px;
+    border-radius: var(--r-md);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+.export-feedback.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.export-feedback.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* Responsividade Totem */
+@media (max-width: 900px) {
+    .export-grid {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .export-divider {
+        flex-direction: row;
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .divider-line {
+        width: auto;
+        height: 1px;
+        flex: 1;
+    }
+}
+

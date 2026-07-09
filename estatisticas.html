@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- SheetJS: geração de planilha Excel no cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body data-page="stats">
 
@@ -56,6 +58,74 @@
                 <div class="chart-container">
                     <canvas id="stats-day-canvas" width="940" height="300" aria-label="Gráfico de participantes por dia"></canvas>
                 </div>
+            </section>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- EXPORTAR RELATÓRIO                       -->
+            <!-- ════════════════════════════════════════ -->
+            <section class="stats-section glass-card export-section" aria-label="Exportar Relatório">
+                <h2 class="section-title"><span class="section-icon">📤</span> Exportar Relatório</h2>
+                <p class="export-description">
+                    Gere a planilha Excel com <strong>4 abas completas</strong>:
+                    Resumo · Prêmios · Por Hora · Por Dia
+                </p>
+
+                <div class="export-grid">
+
+                    <!-- Card: Baixar Excel -->
+                    <div class="export-card" id="export-card-download">
+                        <div class="export-card-icon">📊</div>
+                        <h3 class="export-card-title">Baixar Planilha</h3>
+                        <p class="export-card-desc">
+                            Salve o arquivo <code>.xlsx</code> diretamente no seu dispositivo.
+                            Compatível com Excel, Google Sheets e LibreOffice.
+                        </p>
+                        <button class="btn btn-primary btn-export" id="btn-download-excel"
+                                aria-label="Baixar planilha Excel com as estatísticas">
+                            📥 Baixar Planilha Excel
+                        </button>
+                    </div>
+
+                    <!-- Divisor -->
+                    <div class="export-divider" aria-hidden="true">
+                        <div class="divider-line"></div>
+                        <span class="divider-or">ou</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <!-- Card: Enviar por Email -->
+                    <div class="export-card" id="export-card-email">
+                        <div class="export-card-icon">📧</div>
+                        <h3 class="export-card-title">Enviar por Email</h3>
+                        <p class="export-card-desc">
+                            A planilha será baixada e seu cliente de email abrirá com o relatório
+                            completo no corpo da mensagem, pronto para envio.
+                        </p>
+                        <div class="email-input-group">
+                            <label for="input-email-recipient" class="sr-only">Email do destinatário</label>
+                            <input
+                                type="email"
+                                id="input-email-recipient"
+                                class="prize-name-input email-input"
+                                placeholder="destinatario@email.com"
+                                autocomplete="email"
+                                aria-label="Email do destinatário">
+                        </div>
+                        <button class="btn btn-primary btn-export btn-export-email" id="btn-send-email"
+                                aria-label="Enviar relatório por email">
+                            📧 Enviar por Email
+                        </button>
+                        <p class="export-note">
+                            ⓘ Seu aplicativo de email (Outlook, Gmail, etc.) abrirá com o resumo
+                            pronto. Anexe o arquivo Excel baixado antes de enviar.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Feedback de exportação -->
+                <div id="export-feedback" class="export-feedback hidden" role="alert" aria-live="polite"></div>
+
             </section>
 
         </div>
