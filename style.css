@@ -1485,3 +1485,33 @@ body {
     }
 }
 
+/* Formulário de Configuração de E-mail */
+.email-config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.config-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.config-form-group-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .config-form-group-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+

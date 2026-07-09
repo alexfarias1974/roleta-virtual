@@ -48,6 +48,9 @@ const DEFAULT_CONFIG = {
     bgImage: null,
     bgColor: '#000000',
     spinDuration: 5,
+    brevoApiKey: '',
+    senderEmail: '',
+    senderName: '',
 };
 
 // ══════════════════════════════════════════
@@ -101,6 +104,9 @@ const Storage = {
                 bgImage:      cfg.bgImage       ?? null,
                 bgColor:      cfg.bgColor       ?? '#000000',
                 spinDuration: cfg.spinDuration  ?? 5,
+                brevoApiKey:  cfg.brevoApiKey   ?? '',
+                senderEmail:  cfg.senderEmail   ?? '',
+                senderName:   cfg.senderName    ?? '',
             };
         } catch (e) {
             console.warn('[Storage] Erro ao carregar config:', e);
@@ -442,6 +448,22 @@ const Dashboard = {
             this._saveAndPreview();
         });
 
+        // Configurações de E-mail (Brevo)
+        document.getElementById('input-brevo-api-key').addEventListener('input', (e) => {
+            this.config.brevoApiKey = e.target.value.trim();
+            this._saveAndPreview();
+        });
+
+        document.getElementById('input-sender-email').addEventListener('input', (e) => {
+            this.config.senderEmail = e.target.value.trim();
+            this._saveAndPreview();
+        });
+
+        document.getElementById('input-sender-name').addEventListener('input', (e) => {
+            this.config.senderName = e.target.value.trim();
+            this._saveAndPreview();
+        });
+
         // Botões principais
         document.getElementById('btn-generate').addEventListener('click', () => this._generate());
         document.getElementById('btn-reset').addEventListener('click',    () => this._reset());
@@ -613,6 +635,11 @@ const Dashboard = {
         document.getElementById('bg-color-hex').textContent        = this.config.bgColor || '#000000';
         document.getElementById('input-duration').value            = this.config.spinDuration || 5;
         document.getElementById('duration-display').textContent    = this.config.spinDuration || 5;
+
+        // Configurações Brevo
+        document.getElementById('input-brevo-api-key').value       = this.config.brevoApiKey || '';
+        document.getElementById('input-sender-email').value        = this.config.senderEmail || '';
+        document.getElementById('input-sender-name').value         = this.config.senderName || '';
 
         if (this.config.logo)    this._showLogoPreview(this.config.logo);
         if (this.config.bgImage) this._showBgPreview(this.config.bgImage);
@@ -1067,7 +1094,7 @@ const Stats = {
         this._render(Storage._emptyStats(), config);
     },
 
-    generateExcel() {
+    generateExcel(download = true) {
         const stats = Storage.loadStats();
         const config = Storage.loadConfig();
         const today = todayStr();
@@ -1132,56 +1159,155 @@ const Stats = {
 
         // Gerar arquivo e baixar
         const fileName = `Estatisticas_Roleta_${today}.xlsx`;
-        XLSX.writeFile(wb, fileName);
-        return { fileName, stats, config };
+        if (download) {
+            XLSX.writeFile(wb, fileName);
+        }
+        return { wb, fileName, stats, config };
     },
 
-    sendEmail(recipient) {
+    async sendEmail(recipient) {
         if (!recipient) {
             alert("Por favor, informe um endereço de e-mail.");
             return;
         }
 
-        // Primeiro, gera e baixa a planilha automaticamente
-        const { fileName, stats, config } = this.generateExcel();
+        const config = Storage.loadConfig();
+        if (!config.brevoApiKey || !config.senderEmail) {
+            alert("A API Brevo não está configurada! Vá para a tela de Configurações (Dashboard) e preencha a chave de API e o e-mail do remetente.");
+            return;
+        }
 
-        // Constrói o corpo do e-mail com o resumo formatado em texto
-        const today = new Date().toLocaleDateString("pt-BR");
-        const subject = encodeURIComponent(`Relatório de Estatísticas - Roleta Virtual - ${today}`);
-
-        let bodyText = `Olá,\n\n`;
-        bodyText += `Segue o resumo das estatísticas da Roleta Virtual gerado em ${new Date().toLocaleString("pt-BR")}:\n\n`;
-        bodyText += `--------------------------------------------------\n`;
-        bodyText += `📊 RESUMO GERAL\n`;
-        bodyText += `--------------------------------------------------\n`;
-        bodyText += `Total de Sorteios: ${stats.totalSpins || 0}\n`;
-        bodyText += `Prêmios Configurados: ${config.prizes.length}\n\n`;
-
-        bodyText += `--------------------------------------------------\n`;
-        bodyText += `🎁 RESULTADOS POR PRÊMIO\n`;
-        bodyText += `--------------------------------------------------\n`;
-        config.prizes.forEach((prize) => {
-            const count = stats.prizeCounts[prize.name] || 0;
-            const pct = stats.totalSpins > 0 ? ((count / stats.totalSpins) * 100).toFixed(1) : 0;
-            bodyText += `- ${prize.name}: ${count} sorteios (${pct}%)\n`;
-        });
-        bodyText += `\n`;
-        bodyText += `*Nota: A planilha detalhada "${fileName}" foi gerada e baixada no seu dispositivo. Por favor, lembre-se de anexá-la a este e-mail antes de enviá-lo.*\n\n`;
-        bodyText += `Atenciosamente,\nSistema de Roleta Virtual`;
-
-        const body = encodeURIComponent(bodyText);
-
-        // Abrir mailto
-        window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
-        
-        // Exibir feedback na UI
         const feedbackEl = document.getElementById("export-feedback");
+        const sendBtn = document.getElementById("btn-send-email");
+        
+        // Exibir feedback de progresso e desativar botão
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = "⏳ Enviando...";
+        }
         if (feedbackEl) {
-            feedbackEl.textContent = `Planilha "${fileName}" gerada! O cliente de e-mail foi aberto. Anexe o arquivo baixado antes de enviar.`;
+            feedbackEl.textContent = "Preparando planilha e enviando e-mail...";
             feedbackEl.className = "export-feedback success";
             feedbackEl.classList.remove("hidden");
+        }
+
+        try {
+            const stats = Storage.loadStats();
+            const today = todayStr();
+            const { wb, fileName } = this.generateExcel(false); // não baixa
+
+            // Converter planilha para Base64 usando o SheetJS
+            const xlsxBase64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+            // HTML amigável para o corpo do e-mail
+            let htmlContent = `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
+                    <h2 style="color: #7c3aed; text-align: center; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">🎡 Relatório da Roleta Virtual</h2>
+                    <p>Olá,</p>
+                    <p>Segue o resumo das estatísticas consolidadas da Roleta Virtual de Eventos gerado em <strong>${new Date().toLocaleString("pt-BR")}</strong>:</p>
+                    
+                    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #555;">📊 Resumo Geral</h3>
+                        <p style="margin: 5px 0;"><strong>Total de Sorteios:</strong> ${stats.totalSpins || 0}</p>
+                        <p style="margin: 5px 0;"><strong>Prêmios Configurados:</strong> ${config.prizes.length}</p>
+                    </div>
+
+                    <h3 style="color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px;">🎁 Sorteios por Prêmio</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="background-color: #7c3aed; color: white;">
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Prêmio</th>
+                                <th style="padding: 8px; text-align: center; border: 1px solid #ddd; width: 100px;">Qtd</th>
+                                <th style="padding: 8px; text-align: center; border: 1px solid #ddd; width: 100px;">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            config.prizes.forEach((prize) => {
+                const count = stats.prizeCounts[prize.name] || 0;
+                const pct = stats.totalSpins > 0 ? ((count / stats.totalSpins) * 100).toFixed(1) : 0;
+                htmlContent += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${prize.color}; margin-right:8px;"></span>${prize.name}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${count}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${pct}%</td>
+                    </tr>
+                `;
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 25px; font-size: 0.9em; color: #666; border-top: 1px solid #eee; padding-top: 15px;">
+                        * A planilha consolidada contendo todas as abas de dados (Resumo, Detalhes, Horários e Datas) foi anexada a este e-mail.
+                    </p>
+                    <p style="text-align: center; color: #999; font-size: 0.8em; margin-top: 20px;">
+                        Gerado por Roleta Virtual Interativa
+                    </p>
+                </div>
+            `;
+
+            // Construir payload da Brevo v3 API
+            const requestBody = {
+                sender: {
+                    name: config.senderName || "Roleta Virtual",
+                    email: config.senderEmail
+                },
+                to: [
+                    {
+                        email: recipient
+                    }
+                ],
+                subject: `Relatório de Estatísticas - Roleta Virtual - ${today}`,
+                htmlContent: htmlContent,
+                attachment: [
+                    {
+                        content: xlsxBase64,
+                        name: fileName
+                    }
+                ]
+            };
+
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: {
+                    "accept": "application/json",
+                    "api-key": config.brevoApiKey,
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+                if (feedbackEl) {
+                    feedbackEl.textContent = `Planilha enviada com sucesso para ${recipient}!`;
+                    feedbackEl.className = "export-feedback success";
+                }
+                const emailInput = document.getElementById('input-email-recipient');
+                if (emailInput) emailInput.value = "";
+            } else {
+                const errData = await response.json();
+                console.error("Erro API Brevo:", errData);
+                if (feedbackEl) {
+                    feedbackEl.textContent = `Erro ao enviar e-mail: ${errData.message || 'Verifique as chaves e remetente configurados.'}`;
+                    feedbackEl.className = "export-feedback error";
+                }
+            }
+        } catch (err) {
+            console.error("Erro de Rede:", err);
+            if (feedbackEl) {
+                feedbackEl.textContent = "Erro de conexão ao tentar enviar o e-mail.";
+                feedbackEl.className = "export-feedback error";
+            }
+        } finally {
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = "📧 Enviar por Email";
+            }
+            // Ocultar feedback após 8s
             setTimeout(() => {
-                feedbackEl.classList.add("hidden");
+                if (feedbackEl) feedbackEl.classList.add("hidden");
             }, 8000);
         }
     }
