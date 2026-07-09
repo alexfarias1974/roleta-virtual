@@ -169,32 +169,11 @@ const Storage = {
 };
 
 // ══════════════════════════════════════════
-// ROUTER
+// NAVEGAÇÃO (multi-page)
 // ══════════════════════════════════════════
-const Router = {
-    _views: {},
-
-    init() {
-        this._views = {
-            dashboard: document.getElementById('view-dashboard'),
-            roulette:  document.getElementById('view-roulette'),
-            stats:     document.getElementById('view-stats'),
-        };
-    },
-
-    navigate(view) {
-        Object.values(this._views).forEach(v => v.classList.remove('active'));
-        const target = this._views[view];
-        if (!target) { console.error('[Router] View não encontrada:', view); return; }
-        target.classList.add('active');
-
-        window.scrollTo(0, 0);
-
-        if (view === 'roulette')  Roulette.onEnter();
-        if (view === 'stats')     Stats.onEnter();
-        if (view === 'dashboard') Dashboard.onEnter();
-    },
-};
+function goTo(page) {
+    window.location.href = page;
+}
 
 // ══════════════════════════════════════════
 // ROULETTE RENDERER (Preview + Main Wheel)
@@ -667,7 +646,7 @@ const Dashboard = {
             return;
         }
         Storage.saveConfig(this.config);
-        Router.navigate('roulette');
+        goTo('roleta.html');
     },
 
     // ── Resetar configurações ──
@@ -1090,44 +1069,47 @@ const Stats = {
 };
 
 // ══════════════════════════════════════════
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO (multi-page)
 // ══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar Router
-    Router.init();
+    const page = document.body.dataset.page;
 
-    // Inicializar Dashboard
-    Dashboard.init();
+    // ── DASHBOARD ──────────────────────────
+    if (page === 'dashboard') {
+        Dashboard.init();
+    }
 
-    // ── Navegação: Roulette View ──
-    document.getElementById('btn-to-config').addEventListener('click', () => Router.navigate('dashboard'));
-    document.getElementById('btn-to-stats').addEventListener('click',  () => Router.navigate('stats'));
+    // ── ROLETA ─────────────────────────────
+    else if (page === 'roulette') {
+        Roulette.onEnter();
 
-    // ── Navegação: Stats View ──
-    document.getElementById('btn-stats-to-roulette').addEventListener('click', () => Router.navigate('roulette'));
-    document.getElementById('btn-stats-to-config').addEventListener('click',   () => Router.navigate('dashboard'));
-    document.getElementById('btn-reset-stats').addEventListener('click',       () => Stats.reset());
+        document.getElementById('btn-spin').addEventListener('click', () => Roulette.spin());
+        document.getElementById('roulette-canvas').addEventListener('click', () => {
+            if (!Roulette.isSpinning) Roulette.spin();
+        });
 
-    // ── Botão Girar ──
-    document.getElementById('btn-spin').addEventListener('click', () => Roulette.spin());
+        document.getElementById('btn-to-config').addEventListener('click', () => goTo('index.html'));
+        document.getElementById('btn-to-stats').addEventListener('click',  () => goTo('estatisticas.html'));
 
-    // Também girar ao clicar no canvas
-    document.getElementById('roulette-canvas').addEventListener('click', () => {
-        if (!Roulette.isSpinning) Roulette.spin();
-    });
+        document.getElementById('btn-modal-close').addEventListener('click', () => Modal.hide());
+        document.getElementById('modal-result').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) Modal.hide();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !document.getElementById('modal-result').classList.contains('hidden')) {
+                Modal.hide();
+            }
+        });
+    }
 
-    // ── Modal: fechar ──
-    document.getElementById('btn-modal-close').addEventListener('click', () => Modal.hide());
-    document.getElementById('modal-result').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) Modal.hide();
-    });
+    // ── ESTATÍSTICAS ───────────────────────
+    else if (page === 'stats') {
+        Stats.onEnter();
 
-    // Fechar modal com Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !document.getElementById('modal-result').classList.contains('hidden')) {
-            Modal.hide();
-        }
-    });
+        document.getElementById('btn-stats-to-roulette').addEventListener('click', () => goTo('roleta.html'));
+        document.getElementById('btn-stats-to-config').addEventListener('click',   () => goTo('index.html'));
+        document.getElementById('btn-reset-stats').addEventListener('click',       () => Stats.reset());
+    }
 
-    console.log('[Roleta Virtual] Aplicação inicializada com sucesso. ✓');
+    console.log(`[Roleta Virtual] Página "${page}" inicializada. ✓`);
 });

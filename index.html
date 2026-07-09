@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1080, initial-scale=1.0">
-    <meta name="description" content="Roleta virtual interativa e configurável para eventos em totens. Personalize prêmios, cores e backgrounds.">
-    <title>Roleta Virtual Interativa</title>
+    <meta name="description" content="Dashboard de configuração da roleta virtual interativa para eventos em totens.">
+    <title>Roleta Virtual — Configurações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="dashboard">
 
-    <!-- ══════════════════════════════════════════
-         VIEW: DASHBOARD DE CONFIGURAÇÃO
-    ═══════════════════════════════════════════ -->
     <div id="view-dashboard" class="view active">
         <div class="dashboard-container">
 
@@ -127,7 +124,6 @@
                         </div>
                         <input type="file" id="input-bg" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de background">
                     </div>
-
                     <div class="bg-color-section">
                         <label for="input-bg-color" class="color-label">Cor de fundo alternativa (padrão: preto):</label>
                         <div class="color-input-row">
@@ -174,122 +170,6 @@
                 </button>
             </div>
 
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════
-         VIEW: ROLETA
-    ═══════════════════════════════════════════ -->
-    <div id="view-roulette" class="view">
-        <!-- Background dinâmico -->
-        <div class="roulette-bg" id="roulette-bg" aria-hidden="true"></div>
-        <!-- Overlay sutil para legibilidade -->
-        <div class="roulette-overlay" aria-hidden="true"></div>
-
-        <!-- Navegação -->
-        <nav class="roulette-nav" aria-label="Navegação da roleta">
-            <button class="btn btn-nav" id="btn-to-config" aria-label="Voltar para configurações">
-                ⚙️ Configurações
-            </button>
-            <button class="btn btn-nav" id="btn-to-stats" aria-label="Ver estatísticas">
-                📊 Estatísticas
-            </button>
-        </nav>
-
-        <!-- Logo -->
-        <div class="roulette-logo-area" id="roulette-logo-area">
-            <img id="roulette-logo" src="" alt="Logo do contratante" class="hidden">
-        </div>
-
-        <!-- Roleta -->
-        <div class="roulette-wheel-wrapper">
-            <div class="pointer-wrap" aria-hidden="true">
-                <div class="pointer-triangle"></div>
-            </div>
-            <div class="canvas-glow-ring" aria-hidden="true"></div>
-            <canvas id="roulette-canvas" class="roulette-canvas" aria-label="Roleta de prêmios"></canvas>
-        </div>
-
-        <!-- Botão Girar -->
-        <div class="roulette-actions">
-            <button class="btn-spin" id="btn-spin" aria-label="Girar a roleta">
-                <span class="spin-icon" aria-hidden="true">🎰</span>
-                <span class="spin-text">GIRAR!</span>
-            </button>
-        </div>
-
-        <!-- Último Prêmio Sorteado -->
-        <div class="last-prize-display" id="last-prize-display" aria-live="polite">
-            <span class="last-prize-label">Último prêmio:</span>
-            <span class="last-prize-name" id="last-prize-name">—</span>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════
-         VIEW: ESTATÍSTICAS
-    ═══════════════════════════════════════════ -->
-    <div id="view-stats" class="view">
-        <div class="stats-container">
-
-            <!-- Cabeçalho -->
-            <header class="stats-header">
-                <h1 class="app-title">📊 Estatísticas</h1>
-                <p class="app-subtitle">Histórico completo de sorteios</p>
-            </header>
-
-            <!-- Navegação -->
-            <nav class="stats-nav" aria-label="Navegação das estatísticas">
-                <button class="btn btn-nav" id="btn-stats-to-roulette" aria-label="Voltar para a roleta">🎡 Voltar à Roleta</button>
-                <button class="btn btn-nav" id="btn-stats-to-config" aria-label="Ir para configurações">⚙️ Configurações</button>
-                <button class="btn btn-danger" id="btn-reset-stats" aria-label="Resetar todas as estatísticas">🗑️ Resetar Estatísticas</button>
-            </nav>
-
-            <!-- Total de Sorteios -->
-            <div class="stat-card glass-card">
-                <div class="stat-number" id="stat-total" aria-label="Total de sorteios">0</div>
-                <div class="stat-label">Total de Sorteios Realizados</div>
-            </div>
-
-            <!-- Por Prêmio -->
-            <section class="stats-section glass-card" aria-label="Sorteios por prêmio">
-                <h2 class="section-title"><span class="section-icon">🎁</span> Prêmios Sorteados Individualmente</h2>
-                <div id="stats-prizes-list" class="stats-bars" aria-label="Contagem por prêmio">
-                    <!-- Gerado dinamicamente -->
-                </div>
-            </section>
-
-            <!-- Por Hora -->
-            <section class="stats-section glass-card" aria-label="Participantes por hora">
-                <h2 class="section-title"><span class="section-icon">🕐</span> Participantes por Hora (hoje)</h2>
-                <div class="chart-container">
-                    <canvas id="stats-hour-canvas" width="940" height="300" aria-label="Gráfico de participantes por hora"></canvas>
-                </div>
-            </section>
-
-            <!-- Por Dia -->
-            <section class="stats-section glass-card" aria-label="Participantes por dia">
-                <h2 class="section-title"><span class="section-icon">📅</span> Participantes por Dia</h2>
-                <div class="chart-container">
-                    <canvas id="stats-day-canvas" width="940" height="300" aria-label="Gráfico de participantes por dia"></canvas>
-                </div>
-            </section>
-
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════
-         MODAL: RESULTADO DO SORTEIO
-    ═══════════════════════════════════════════ -->
-    <div id="modal-result" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="modal-card">
-            <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
-            <div class="modal-emoji" aria-hidden="true">🎉</div>
-            <h2 class="modal-title" id="modal-title">Parabéns!</h2>
-            <p class="modal-subtitle">O prêmio sorteado foi:</p>
-            <div class="modal-prize-name" id="modal-prize-name" aria-live="assertive">—</div>
-            <button class="btn btn-primary btn-modal-close" id="btn-modal-close" aria-label="Fechar resultado e continuar">
-                ✓ Continuar
-            </button>
         </div>
     </div>
 

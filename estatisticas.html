@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <meta name="description" content="Estatísticas de uso da roleta virtual: total de sorteios, contagem por prêmio e participantes por hora e dia.">
+    <title>Roleta Virtual — Estatísticas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="stats">
+
+    <div id="view-stats" class="view active">
+        <div class="stats-container">
+
+            <!-- Cabeçalho -->
+            <header class="stats-header">
+                <h1 class="app-title">📊 Estatísticas</h1>
+                <p class="app-subtitle">Histórico completo de sorteios</p>
+            </header>
+
+            <!-- Navegação -->
+            <nav class="stats-nav" aria-label="Navegação das estatísticas">
+                <button class="btn btn-nav" id="btn-stats-to-roulette" aria-label="Voltar para a roleta">🎡 Voltar à Roleta</button>
+                <button class="btn btn-nav" id="btn-stats-to-config" aria-label="Ir para configurações">⚙️ Configurações</button>
+                <button class="btn btn-danger" id="btn-reset-stats" aria-label="Resetar todas as estatísticas">🗑️ Resetar Estatísticas</button>
+            </nav>
+
+            <!-- Total de Sorteios -->
+            <div class="stat-card glass-card">
+                <div class="stat-number" id="stat-total" aria-label="Total de sorteios">0</div>
+                <div class="stat-label">Total de Sorteios Realizados</div>
+            </div>
+
+            <!-- Por Prêmio -->
+            <section class="stats-section glass-card" aria-label="Sorteios por prêmio">
+                <h2 class="section-title"><span class="section-icon">🎁</span> Prêmios Sorteados Individualmente</h2>
+                <div id="stats-prizes-list" class="stats-bars" aria-label="Contagem por prêmio">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </section>
+
+            <!-- Por Hora -->
+            <section class="stats-section glass-card" aria-label="Participantes por hora">
+                <h2 class="section-title"><span class="section-icon">🕐</span> Participantes por Hora (hoje)</h2>
+                <div class="chart-container">
+                    <canvas id="stats-hour-canvas" width="940" height="300" aria-label="Gráfico de participantes por hora"></canvas>
+                </div>
+            </section>
+
+            <!-- Por Dia -->
+            <section class="stats-section glass-card" aria-label="Participantes por dia">
+                <h2 class="section-title"><span class="section-icon">📅</span> Participantes por Dia</h2>
+                <div class="chart-container">
+                    <canvas id="stats-day-canvas" width="940" height="300" aria-label="Gráfico de participantes por dia"></canvas>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
