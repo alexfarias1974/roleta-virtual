@@ -1,0 +1,11 @@
+# Dependências e arquivos temporários
+node_modules/
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Servidor local (não precisa ir pro GitHub)
+servidor.ps1

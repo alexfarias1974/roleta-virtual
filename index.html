@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <meta name="description" content="Roleta virtual interativa e configurável para eventos em totens. Personalize prêmios, cores e backgrounds.">
+    <title>Roleta Virtual Interativa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════════
+         VIEW: DASHBOARD DE CONFIGURAÇÃO
+    ═══════════════════════════════════════════ -->
+    <div id="view-dashboard" class="view active">
+        <div class="dashboard-container">
+
+            <!-- Cabeçalho -->
+            <header class="dashboard-header">
+                <div class="header-icon">🎡</div>
+                <h1 class="app-title">Roleta Virtual</h1>
+                <p class="app-subtitle">Configure sua roleta personalizada para o evento</p>
+            </header>
+
+            <!-- 1. Logomarca do Contratante -->
+            <section class="config-section glass-card" aria-label="Logomarca do Contratante">
+                <h2 class="section-title"><span class="section-icon">🏢</span> Logomarca do Contratante</h2>
+                <div class="logo-upload-area" id="logo-drop-zone" role="button" tabindex="0" aria-label="Área de upload da logomarca">
+                    <div id="logo-preview-container" class="logo-preview hidden">
+                        <img id="logo-preview-img" src="" alt="Logo do contratante">
+                        <button class="btn-remove" id="btn-remove-logo" title="Remover logo" aria-label="Remover logo">✕</button>
+                    </div>
+                    <div id="logo-placeholder" class="upload-placeholder">
+                        <div class="upload-icon">🖼️</div>
+                        <p class="upload-main-text">Clique ou arraste a logo aqui</p>
+                        <p class="upload-hint">Formatos aceitos: PNG, JPG</p>
+                    </div>
+                    <input type="file" id="input-logo" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de logo">
+                </div>
+            </section>
+
+            <!-- 2. Quantidade de Prêmios -->
+            <section class="config-section glass-card" aria-label="Quantidade de Prêmios">
+                <h2 class="section-title"><span class="section-icon">🎁</span> Quantidade de Prêmios</h2>
+                <div class="prize-count-control">
+                    <button class="btn-counter" id="btn-prize-down" aria-label="Diminuir quantidade de prêmios">▼</button>
+                    <div class="counter-display" aria-live="polite">
+                        <span id="prize-count-display" class="counter-number">3</span>
+                        <span class="counter-label">prêmios</span>
+                    </div>
+                    <button class="btn-counter" id="btn-prize-up" aria-label="Aumentar quantidade de prêmios">▲</button>
+                </div>
+                <p class="section-hint">Máximo de 10 prêmios</p>
+            </section>
+
+            <!-- 3. Paletas Pré-definidas -->
+            <section class="config-section glass-card" aria-label="Paletas de Cores Pré-definidas">
+                <h2 class="section-title"><span class="section-icon">🎨</span> Paletas Pré-definidas</h2>
+                <div class="palettes-grid" role="group" aria-label="Selecionar paleta de cores">
+                    <button class="palette-btn" data-palette="vibrantes" id="palette-vibrantes" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FF5733"></span>
+                            <span style="background:#FFC300"></span>
+                            <span style="background:#28B463"></span>
+                            <span style="background:#2E86C1"></span>
+                            <span style="background:#7D3C98"></span>
+                        </div>
+                        <span class="palette-name">Vibrantes</span>
+                    </button>
+                    <button class="palette-btn" data-palette="pasteis" id="palette-pasteis" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FADADD"></span>
+                            <span style="background:#FFF9C4"></span>
+                            <span style="background:#C8E6C9"></span>
+                            <span style="background:#BBDEFB"></span>
+                            <span style="background:#E1BEE7"></span>
+                        </div>
+                        <span class="palette-name">Pastéis</span>
+                    </button>
+                    <button class="palette-btn" data-palette="classicas" id="palette-classicas" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#C0392B"></span>
+                            <span style="background:#E67E22"></span>
+                            <span style="background:#F1C40F"></span>
+                            <span style="background:#27AE60"></span>
+                            <span style="background:#2980B9"></span>
+                        </div>
+                        <span class="palette-name">Clássicas</span>
+                    </button>
+                    <button class="palette-btn" data-palette="neon" id="palette-neon" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FF00FF"></span>
+                            <span style="background:#00FFFF"></span>
+                            <span style="background:#FF6600"></span>
+                            <span style="background:#00FF00"></span>
+                            <span style="background:#FF0066"></span>
+                        </div>
+                        <span class="palette-name">Neon</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. Nomes e Cores dos Prêmios -->
+            <section class="config-section glass-card" aria-label="Nomes e Cores dos Prêmios">
+                <h2 class="section-title"><span class="section-icon">✏️</span> Nomes e Cores dos Prêmios</h2>
+                <div class="prizes-list" id="prizes-list" role="list" aria-label="Lista de prêmios">
+                    <!-- Gerado dinamicamente pelo JavaScript -->
+                </div>
+            </section>
+
+            <!-- 5. Background da Roleta -->
+            <section class="config-section glass-card" aria-label="Background da Roleta">
+                <h2 class="section-title"><span class="section-icon">🖼️</span> Background da Roleta</h2>
+                <div class="bg-config">
+                    <div class="bg-upload-area" id="bg-drop-zone" role="button" tabindex="0" aria-label="Área de upload do background">
+                        <div id="bg-preview-container" class="bg-preview hidden">
+                            <img id="bg-preview-img" src="" alt="Preview do background">
+                            <button class="btn-remove" id="btn-remove-bg" title="Remover background" aria-label="Remover background">✕</button>
+                        </div>
+                        <div id="bg-placeholder" class="upload-placeholder small">
+                            <div class="upload-icon">🌄</div>
+                            <p class="upload-main-text">Clique ou arraste o background</p>
+                            <p class="upload-hint">PNG ou JPG · Será ajustado para 1080×1920</p>
+                        </div>
+                        <input type="file" id="input-bg" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de background">
+                    </div>
+
+                    <div class="bg-color-section">
+                        <label for="input-bg-color" class="color-label">Cor de fundo alternativa (padrão: preto):</label>
+                        <div class="color-input-row">
+                            <input type="color" id="input-bg-color" value="#000000" class="color-input-large" aria-label="Cor de fundo">
+                            <span id="bg-color-hex" class="hex-display">#000000</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Duração do Giro -->
+            <section class="config-section glass-card" aria-label="Duração do Giro">
+                <h2 class="section-title"><span class="section-icon">⏱️</span> Duração do Giro</h2>
+                <div class="duration-control">
+                    <div class="duration-labels">
+                        <span>3s</span>
+                        <span>10s</span>
+                    </div>
+                    <input type="range" id="input-duration" min="3" max="10" value="5" step="0.5"
+                           class="range-slider" aria-label="Duração do giro" aria-valuemin="3" aria-valuemax="10" aria-valuenow="5">
+                    <div class="duration-display">
+                        <span id="duration-display" class="duration-value">5</span>
+                        <span class="duration-unit">segundos</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Pré-visualização -->
+            <section class="config-section glass-card" aria-label="Pré-visualização da Roleta">
+                <h2 class="section-title"><span class="section-icon">👁️</span> Pré-visualização em Tempo Real</h2>
+                <div class="preview-container">
+                    <div class="preview-pointer-top" aria-hidden="true"></div>
+                    <canvas id="preview-canvas" width="420" height="420" aria-label="Pré-visualização da roleta"></canvas>
+                </div>
+            </section>
+
+            <!-- 8. Botões de Ação -->
+            <div class="dashboard-actions">
+                <button class="btn btn-secondary" id="btn-reset" aria-label="Resetar todas as configurações">
+                    🔄 Resetar
+                </button>
+                <button class="btn btn-primary btn-generate" id="btn-generate" aria-label="Gerar a roleta com as configurações atuais">
+                    🎡 Gerar Roleta
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         VIEW: ROLETA
+    ═══════════════════════════════════════════ -->
+    <div id="view-roulette" class="view">
+        <!-- Background dinâmico -->
+        <div class="roulette-bg" id="roulette-bg" aria-hidden="true"></div>
+        <!-- Overlay sutil para legibilidade -->
+        <div class="roulette-overlay" aria-hidden="true"></div>
+
+        <!-- Navegação -->
+        <nav class="roulette-nav" aria-label="Navegação da roleta">
+            <button class="btn btn-nav" id="btn-to-config" aria-label="Voltar para configurações">
+                ⚙️ Configurações
+            </button>
+            <button class="btn btn-nav" id="btn-to-stats" aria-label="Ver estatísticas">
+                📊 Estatísticas
+            </button>
+        </nav>
+
+        <!-- Logo -->
+        <div class="roulette-logo-area" id="roulette-logo-area">
+            <img id="roulette-logo" src="" alt="Logo do contratante" class="hidden">
+        </div>
+
+        <!-- Roleta -->
+        <div class="roulette-wheel-wrapper">
+            <div class="pointer-wrap" aria-hidden="true">
+                <div class="pointer-triangle"></div>
+            </div>
+            <div class="canvas-glow-ring" aria-hidden="true"></div>
+            <canvas id="roulette-canvas" class="roulette-canvas" aria-label="Roleta de prêmios"></canvas>
+        </div>
+
+        <!-- Botão Girar -->
+        <div class="roulette-actions">
+            <button class="btn-spin" id="btn-spin" aria-label="Girar a roleta">
+                <span class="spin-icon" aria-hidden="true">🎰</span>
+                <span class="spin-text">GIRAR!</span>
+            </button>
+        </div>
+
+        <!-- Último Prêmio Sorteado -->
+        <div class="last-prize-display" id="last-prize-display" aria-live="polite">
+            <span class="last-prize-label">Último prêmio:</span>
+            <span class="last-prize-name" id="last-prize-name">—</span>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         VIEW: ESTATÍSTICAS
+    ═══════════════════════════════════════════ -->
+    <div id="view-stats" class="view">
+        <div class="stats-container">
+
+            <!-- Cabeçalho -->
+            <header class="stats-header">
+                <h1 class="app-title">📊 Estatísticas</h1>
+                <p class="app-subtitle">Histórico completo de sorteios</p>
+            </header>
+
+            <!-- Navegação -->
+            <nav class="stats-nav" aria-label="Navegação das estatísticas">
+                <button class="btn btn-nav" id="btn-stats-to-roulette" aria-label="Voltar para a roleta">🎡 Voltar à Roleta</button>
+                <button class="btn btn-nav" id="btn-stats-to-config" aria-label="Ir para configurações">⚙️ Configurações</button>
+                <button class="btn btn-danger" id="btn-reset-stats" aria-label="Resetar todas as estatísticas">🗑️ Resetar Estatísticas</button>
+            </nav>
+
+            <!-- Total de Sorteios -->
+            <div class="stat-card glass-card">
+                <div class="stat-number" id="stat-total" aria-label="Total de sorteios">0</div>
+                <div class="stat-label">Total de Sorteios Realizados</div>
+            </div>
+
+            <!-- Por Prêmio -->
+            <section class="stats-section glass-card" aria-label="Sorteios por prêmio">
+                <h2 class="section-title"><span class="section-icon">🎁</span> Prêmios Sorteados Individualmente</h2>
+                <div id="stats-prizes-list" class="stats-bars" aria-label="Contagem por prêmio">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </section>
+
+            <!-- Por Hora -->
+            <section class="stats-section glass-card" aria-label="Participantes por hora">
+                <h2 class="section-title"><span class="section-icon">🕐</span> Participantes por Hora (hoje)</h2>
+                <div class="chart-container">
+                    <canvas id="stats-hour-canvas" width="940" height="300" aria-label="Gráfico de participantes por hora"></canvas>
+                </div>
+            </section>
+
+            <!-- Por Dia -->
+            <section class="stats-section glass-card" aria-label="Participantes por dia">
+                <h2 class="section-title"><span class="section-icon">📅</span> Participantes por Dia</h2>
+                <div class="chart-container">
+                    <canvas id="stats-day-canvas" width="940" height="300" aria-label="Gráfico de participantes por dia"></canvas>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         MODAL: RESULTADO DO SORTEIO
+    ═══════════════════════════════════════════ -->
+    <div id="modal-result" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-card">
+            <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+            <div class="modal-emoji" aria-hidden="true">🎉</div>
+            <h2 class="modal-title" id="modal-title">Parabéns!</h2>
+            <p class="modal-subtitle">O prêmio sorteado foi:</p>
+            <div class="modal-prize-name" id="modal-prize-name" aria-live="assertive">—</div>
+            <button class="btn btn-primary btn-modal-close" id="btn-modal-close" aria-label="Fechar resultado e continuar">
+                ✓ Continuar
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
