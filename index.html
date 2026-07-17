@@ -152,27 +152,34 @@
             </section>
 
             <!-- 7. Configurações de E-mail (Brevo API) -->
-            <section class="config-section glass-card" aria-label="Configurações de E-mail">
-                <h2 class="section-title"><span class="section-icon">📧</span> Configurações de E-mail (Brevo)</h2>
-                <p class="section-hint">Configurações para envio automático e gratuito da planilha direta ao cliente (300 envios/dia grátis).</p>
-                
-                <div class="email-config-form">
-                    <div class="config-form-group">
-                        <label for="input-brevo-api-key" class="color-label">Chave de API Brevo (v3):</label>
-                        <input type="password" id="input-brevo-api-key" class="prize-name-input" placeholder="xkeysib-..." aria-label="Chave de API Brevo">
-                    </div>
-                    <div class="config-form-group-row">
+            <section class="config-section glass-card accordion-section" aria-label="Configurações de E-mail">
+                <button class="accordion-header" id="btn-email-config-toggle" aria-expanded="false" aria-controls="email-config-body">
+                    <span class="accordion-title">
+                        <span class="section-icon">📧</span> Configurações de E-mail (Brevo)
+                    </span>
+                    <span class="accordion-chevron" aria-hidden="true">&#8250;</span>
+                </button>
+                <div class="accordion-body" id="email-config-body" hidden>
+                    <p class="section-hint">Configurações para envio automático e gratuito da planilha direta ao cliente (300 envios/dia grátis).</p>
+                    <div class="email-config-form">
                         <div class="config-form-group">
-                            <label for="input-sender-email" class="color-label">E-mail do Remetente (Autorizado na Brevo):</label>
-                            <input type="email" id="input-sender-email" class="prize-name-input" placeholder="seu-email@dominio.com" aria-label="E-mail do remetente">
+                            <label for="input-brevo-api-key" class="color-label">Chave de API Brevo (v3):</label>
+                            <input type="password" id="input-brevo-api-key" class="prize-name-input" placeholder="xkeysib-..." aria-label="Chave de API Brevo">
                         </div>
-                        <div class="config-form-group">
-                            <label for="input-sender-name" class="color-label">Nome do Remetente:</label>
-                            <input type="text" id="input-sender-name" class="prize-name-input" placeholder="Ex: Evento Roleta" aria-label="Nome do remetente">
+                        <div class="config-form-group-row">
+                            <div class="config-form-group">
+                                <label for="input-sender-email" class="color-label">E-mail do Remetente (Autorizado na Brevo):</label>
+                                <input type="email" id="input-sender-email" class="prize-name-input" placeholder="seu-email@dominio.com" aria-label="E-mail do remetente">
+                            </div>
+                            <div class="config-form-group">
+                                <label for="input-sender-name" class="color-label">Nome do Remetente:</label>
+                                <input type="text" id="input-sender-name" class="prize-name-input" placeholder="Ex: Evento Roleta" aria-label="Nome do remetente">
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
 
             <!-- 8. Pré-visualização -->
             <section class="config-section glass-card" aria-label="Pré-visualização da Roleta">
@@ -197,5 +204,23 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Accordion: Configurações de E-mail (Brevo)
+        const emailToggleBtn = document.getElementById('btn-email-config-toggle');
+        const emailConfigBody = document.getElementById('email-config-body');
+
+        if (emailToggleBtn && emailConfigBody) {
+            emailToggleBtn.addEventListener('click', () => {
+                const isExpanded = emailToggleBtn.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    emailToggleBtn.setAttribute('aria-expanded', 'false');
+                    emailConfigBody.hidden = true;
+                } else {
+                    emailToggleBtn.setAttribute('aria-expanded', 'true');
+                    emailConfigBody.hidden = false;
+                }
+            });
+        }
+    </script>
 </body>
 </html>
