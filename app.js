@@ -257,82 +257,64 @@ const RouletteRenderer = {
             const name = prize.name || `Prêmio ${i + 1}`;
 
             // Largura disponível = corda da fatia na posição do texto
-            // chord ≈ 2 * textR * sin(sliceAngle / 2), com margem de 15%
             const maxW = isPreview
                 ? 2 * textR * Math.sin(sliceAngle / 2) * 0.80
                 : 2 * textR * Math.sin(sliceAngle / 2) * 0.82;
+
+            // Altura disponível = comprimento do arco na posição do texto
+            const maxH = isPreview
+                ? sliceAngle * textR * 0.75
+                : sliceAngle * textR * 0.78;
 
             const maxFontSize = isPreview
                 ? Math.max(8,  Math.min(16, 130 / n))
                 : Math.max(14, Math.min(30, 230 / n));
             const minFontSize = isPreview ? 6 : 10;
 
-            // Helper: mede largura de um texto com dada fonte
-            function measureText(text, fs) {
+            // Mede largura de um texto com dada fonte
+            function measureW(text, fs) {
                 ctx.font = `bold ${fs}px 'Outfit', sans-serif`;
                 return ctx.measureText(text).width;
             }
 
-            // Helper: quebra o nome em linhas que caibam em maxW
+            // Quebra o nome em linhas que caibam em maxW para um dado fontSize
             function wrapWords(text, fs) {
                 const words = text.split(' ');
                 const lines = [];
                 let current = '';
                 for (const word of words) {
                     const candidate = current ? current + ' ' + word : word;
-                    if (measureText(candidate, fs) <= maxW) {
+                    if (measureW(candidate, fs) <= maxW) {
                         current = candidate;
                     } else {
                         if (current) lines.push(current);
-                        // Se a palavra sozinha não cabe, force-a como linha
-                        current = word;
+                        current = word; // palavra sozinha sempre entra como linha
                     }
                 }
                 if (current) lines.push(current);
                 return lines;
             }
 
-            // 1. Tentar caber o nome em UMA linha, reduzindo o fontSize
+            // Estratégia:
+            // 1. Começar com a fonte GRANDE e quebrar em linhas pela LARGURA
+            // 2. Só reduzir a fonte se as linhas empilhadas não couberem na ALTURA
             let fs = maxFontSize;
-            while (fs > minFontSize && measureText(name, fs) > maxW) {
+            let finalLines = wrapWords(name, fs);
+
+            while (fs > minFontSize) {
+                const totalH = finalLines.length * fs * 1.25;
+                if (totalH <= maxH) break; // cabe na altura → manter este tamanho
                 fs -= 1;
+                finalLines = wrapWords(name, fs); // re-calcular wrap com nova fonte
             }
 
-            let lines;
-            if (measureText(name, fs) <= maxW) {
-                // Coube em uma linha
-                lines = [name];
-            } else {
-                // 2. Não coube em uma linha — quebrar em palavras
-                // Tentar primeiro com fontSize atual (mínimo), depois com redução
-                fs = maxFontSize;
-                let bestLines = null;
-                // Altura disponível (aproximadamente o dobro de maxW para tolens com muitas fatias)
-                const maxLineH = isPreview ? 8 : 14;
-
-                // Reduzir fontSize e tentar wrap até encontrar boa proporção
-                while (fs >= minFontSize) {
-                    const wrapped = wrapWords(name, fs);
-                    // Verificar se todas as linhas cabem na largura
-                    const allFit = wrapped.every(l => measureText(l, fs) <= maxW);
-                    if (allFit) {
-                        bestLines = wrapped;
-                        break;
-                    }
-                    fs -= 1;
-                }
-
-                lines = bestLines || wrapWords(name, minFontSize);
-                fs = Math.max(fs, minFontSize);
-            }
-
-            // Renderizar as linhas centradas verticalmente
+            // Renderizar as linhas centradas verticalmente na fatia
             ctx.font = `bold ${fs}px 'Outfit', sans-serif`;
-            const lineH = fs * 1.25;
-            const totalH = lines.length * lineH;
+            const lineH  = fs * 1.25;
+            const totalH = finalLines.length * lineH;
             const startY = -totalH / 2 + lineH / 2;
 
-            lines.forEach((line, li) => {
+            finalLines.forEach((line, li) => {
                 ctx.fillText(line, 0, startY + li * lineH);
             });
 
