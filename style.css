@@ -282,19 +282,22 @@ body {
 
 /* Botão de Navegação */
 .btn-nav {
-    background: rgba(255, 255, 255, 0.09);
+    background: rgba(20, 15, 40, 0.65);
     color: var(--text-primary);
-    border: 1px solid var(--border-glass);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     padding: 14px 30px;
     font-size: 1rem;
     border-radius: var(--r-md);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 .btn-nav:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: var(--border-glass-hover);
+    background: rgba(40, 30, 70, 0.80);
+    border-color: rgba(255, 255, 255, 0.32);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
 }
 
 /* Botão de Perigo */
@@ -934,10 +937,15 @@ body {
 
 .roulette-nav {
     display: flex;
-    justify-content: space-between;
-    width: 100%;
-    z-index: 10;
+    justify-content: center;
+    align-items: center;
     gap: 20px;
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: auto;
 }
 
 .roulette-logo-area {
