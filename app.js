@@ -1166,9 +1166,9 @@ const Modal = {
         this._origSubtitle = subEl.textContent;
         this._origEmoji    = emojiEl.textContent;
 
-        emojiEl.textContent  = '🎰';
-        titleEl.textContent  = 'Tente de novo!';
-        subEl.textContent    = 'Continue girando, um prêmio está chegando!';
+        emojiEl.textContent  = '🏆';
+        titleEl.textContent  = 'Obrigado por participar!';
+        subEl.textContent    = 'Continue tentando, um prêmio pode ser seu!';
         prizeEl.textContent  = '';
 
         modal.classList.remove('hidden');
@@ -1651,7 +1651,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── ROLETA ─────────────────────────────
     else if (page === 'roulette') {
         Roulette.onEnter();
-        EventTimer.initOperatorPanel();
+        // Painel do operador desativado na tela da roleta — visível apenas no Dashboard
 
         document.getElementById('btn-spin').addEventListener('click', () => Roulette.spin());
         document.getElementById('roulette-canvas').addEventListener('click', () => {
