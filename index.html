@@ -151,7 +151,46 @@
                 </div>
             </section>
 
-            <!-- 7. Configurações de E-mail (Brevo API) -->
+            <!-- 7. Controle de Tempo do Evento -->
+            <section class="config-section glass-card" aria-label="Controle de Tempo do Evento">
+                <h2 class="section-title"><span class="section-icon">⏱️</span> Controle de Tempo do Evento</h2>
+                <p class="section-hint">Distribui os prêmios automaticamente ao longo da duração do evento, sem deixar acabar cedo nem sobrar no final.</p>
+
+                <div class="event-timer-form">
+                    <div class="config-form-group-row">
+                        <div class="config-form-group">
+                            <label class="color-label">Duração do Evento:</label>
+                            <div class="duration-inputs">
+                                <input type="number" id="input-event-hours" class="prize-name-input duration-input"
+                                    min="0" max="12" value="2" aria-label="Horas">
+                                <span class="duration-sep">h</span>
+                                <input type="number" id="input-event-minutes" class="prize-name-input duration-input"
+                                    min="0" max="59" value="30" aria-label="Minutos">
+                                <span class="duration-sep">min</span>
+                            </div>
+                        </div>
+                        <div class="config-form-group">
+                            <label for="input-event-total-prizes" class="color-label">Total de Prêmios a Distribuir:</label>
+                            <input type="number" id="input-event-total-prizes" class="prize-name-input"
+                                min="1" max="500" value="15" aria-label="Total de prêmios">
+                        </div>
+                    </div>
+                    <div class="event-timer-status" id="event-timer-status">
+                        <span class="timer-status-dot" id="timer-status-dot"></span>
+                        <span id="timer-status-text">Evento não iniciado</span>
+                    </div>
+                    <div class="event-timer-actions">
+                        <button class="btn btn-primary" id="btn-start-event" aria-label="Iniciar controle de tempo do evento">
+                            ▶ Iniciar Evento
+                        </button>
+                        <button class="btn btn-secondary" id="btn-stop-event" aria-label="Encerrar controle de tempo do evento" style="display:none;">
+                            ⏹ Encerrar Evento
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. Configurações de E-mail (Brevo API) -->
             <section class="config-section glass-card accordion-section" aria-label="Configurações de E-mail">
                 <button class="accordion-header" id="btn-email-config-toggle" aria-expanded="false" aria-controls="email-config-body">
                     <span class="accordion-title">

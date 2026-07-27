@@ -84,6 +84,221 @@ function contrastColor(hex) {
 }
 
 // ══════════════════════════════════════════
+// EVENT TIMER — Cadência temporal de prêmios
+// ══════════════════════════════════════════
+const EventTimer = {
+    STORAGE_KEY: 'roulette_event_timer',
+    _tickInterval: null,
+
+    /** Carrega o estado salvo do localStorage */
+    load() {
+        try {
+            const raw = localStorage.getItem(this.STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+
+    /** Salva o estado no localStorage */
+    save(state) {
+        try {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.warn('[EventTimer] Erro ao salvar:', e);
+        }
+    },
+
+    /** Inicia o evento */
+    start(durationMs, totalPrizes) {
+        const state = {
+            active:       true,
+            startTime:    Date.now(),
+            durationMs,
+            totalPrizes,
+            prizesGiven:  0,
+            // Pré-calcular variação aleatória por prêmio (±10% da janela por prêmio)
+            offsets:      this._buildOffsets(totalPrizes, durationMs),
+        };
+        this.save(state);
+        return state;
+    },
+
+    /** Encerra o evento */
+    stop() {
+        localStorage.removeItem(this.STORAGE_KEY);
+    },
+
+    /**
+     * Gera offsets aleatórios para cada prêmio.
+     * Cada prêmio tem um timestamp "esperado" com variação de ±variance_ms.
+     * variance = 10% do intervalo médio entre prêmios.
+     */
+    _buildOffsets(totalPrizes, durationMs) {
+        const interval  = durationMs / totalPrizes;
+        const variance  = interval * 0.10; // ±10% do intervalo
+        const offsets   = [];
+        for (let i = 0; i < totalPrizes; i++) {
+            offsets.push((Math.random() * 2 - 1) * variance); // [-variance, +variance]
+        }
+        return offsets;
+    },
+
+    /**
+     * Verifica se um prêmio pode ser concedido agora.
+     * Retorna { allowed: bool, nextInMs: number }
+     */
+    check() {
+        const state = this.load();
+        if (!state || !state.active) return { allowed: true, nextInMs: 0 };
+
+        const elapsed    = Date.now() - state.startTime;
+        const { durationMs, totalPrizes, prizesGiven, offsets } = state;
+
+        // Evento encerrado por tempo
+        if (elapsed >= durationMs) return { allowed: false, nextInMs: 0, finished: true };
+
+        // Todos os prêmios já foram dados
+        if (prizesGiven >= totalPrizes) return { allowed: false, nextInMs: 0, finished: true };
+
+        // Calcular o timestamp esperado para o PRÓXIMO prêmio (índice = prizesGiven)
+        const interval    = durationMs / totalPrizes;
+        const nextIdx     = prizesGiven;
+        const baseTime    = interval * (nextIdx + 1);
+        const offset      = offsets[nextIdx] || 0;
+        const expectedAt  = baseTime + offset;
+
+        if (elapsed >= expectedAt) {
+            return { allowed: true, nextInMs: 0 };
+        } else {
+            return { allowed: false, nextInMs: Math.ceil(expectedAt - elapsed) };
+        }
+    },
+
+    /** Registra que um prêmio foi concedido */
+    recordPrize() {
+        const state = this.load();
+        if (!state) return;
+        state.prizesGiven = (state.prizesGiven || 0) + 1;
+        this.save(state);
+    },
+
+    /** Retorna info resumida para o painel */
+    summary() {
+        const state = this.load();
+        if (!state || !state.active) return null;
+        const elapsed    = Date.now() - state.startTime;
+        const remaining  = Math.max(0, state.durationMs - elapsed);
+        const { allowed, nextInMs } = this.check();
+        return {
+            active:       true,
+            prizesGiven:  state.prizesGiven,
+            totalPrizes:  state.totalPrizes,
+            remaining,
+            allowed,
+            nextInMs,
+        };
+    },
+
+    /** Formata milissegundos em HH:MM:SS */
+    formatMs(ms) {
+        const total = Math.floor(ms / 1000);
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        const pad = n => String(n).padStart(2, '0');
+        return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    },
+
+    // ─── Dashboard UI ─────────────────────────
+    initDashboardUI() {
+        const state = this.load();
+        const startBtn = document.getElementById('btn-start-event');
+        const stopBtn  = document.getElementById('btn-stop-event');
+        if (!startBtn || !stopBtn) return;
+
+        if (state && state.active) {
+            this._setDashboardActive(true, state);
+        }
+
+        startBtn.addEventListener('click', () => {
+            const hours   = parseInt(document.getElementById('input-event-hours').value)   || 0;
+            const mins    = parseInt(document.getElementById('input-event-minutes').value)  || 0;
+            const prizes  = parseInt(document.getElementById('input-event-total-prizes').value) || 15;
+            const durMs   = (hours * 60 + mins) * 60 * 1000;
+            if (durMs <= 0) { alert('Defina uma duração válida para o evento.'); return; }
+            if (prizes <= 0) { alert('Defina ao menos 1 prêmio.'); return; }
+            const s = this.start(durMs, prizes);
+            this._setDashboardActive(true, s);
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (!confirm('Encerrar o controle de tempo do evento?')) return;
+            this.stop();
+            this._setDashboardActive(false, null);
+        });
+
+        // Atualizar status a cada segundo
+        this._tickInterval = setInterval(() => this._updateDashboardStatus(), 1000);
+        this._updateDashboardStatus();
+    },
+
+    _setDashboardActive(active, state) {
+        const startBtn = document.getElementById('btn-start-event');
+        const stopBtn  = document.getElementById('btn-stop-event');
+        if (!startBtn || !stopBtn) return;
+        startBtn.style.display = active ? 'none'  : '';
+        stopBtn.style.display  = active ? ''      : 'none';
+        this._updateDashboardStatus();
+    },
+
+    _updateDashboardStatus() {
+        const dot  = document.getElementById('timer-status-dot');
+        const text = document.getElementById('timer-status-text');
+        if (!dot || !text) return;
+        const s = this.summary();
+        if (!s) {
+            dot.className = 'timer-status-dot inactive';
+            text.textContent = 'Evento não iniciado';
+            return;
+        }
+        const { allowed, prizesGiven, totalPrizes, remaining, nextInMs } = s;
+        dot.className = 'timer-status-dot ' + (allowed ? 'ok' : 'hold');
+        const remStr = this.formatMs(remaining);
+        if (allowed) {
+            text.textContent = `✅ Prêmio liberado! | ${prizesGiven}/${totalPrizes} dados | Restam: ${remStr}`;
+        } else {
+            const nextStr = this.formatMs(nextInMs);
+            text.textContent = `⏳ Aguarde ${nextStr} | ${prizesGiven}/${totalPrizes} dados | Restam: ${remStr}`;
+        }
+    },
+
+    // ─── Painel do Operador (tela da roleta) ──
+    initOperatorPanel() {
+        const panel = document.getElementById('operator-panel');
+        if (!panel) return;
+        const s = this.load();
+        if (!s || !s.active) { panel.style.display = 'none'; return; }
+        panel.style.display = '';
+        this._updateOperatorPanel();
+        this._tickInterval = setInterval(() => this._updateOperatorPanel(), 1000);
+    },
+
+    _updateOperatorPanel() {
+        const s = this.summary();
+        if (!s) return;
+        const { allowed, prizesGiven, totalPrizes, remaining, nextInMs } = s;
+        const dot   = document.getElementById('op-dot');
+        const stTxt = document.getElementById('op-status-text');
+        const prTxt = document.getElementById('op-prizes-text');
+        const tmTxt = document.getElementById('op-time-text');
+        if (!dot) return;
+        dot.className  = 'op-dot ' + (allowed ? 'ok' : 'hold');
+        stTxt.textContent = allowed ? 'Prêmio liberado ✅' : `Aguarde ${this.formatMs(nextInMs)} ⏳`;
+        prTxt.textContent = `${prizesGiven} / ${totalPrizes} prêmios`;
+        tmTxt.textContent = this.formatMs(remaining);
+    },
+};
+
+// ══════════════════════════════════════════
 // STORAGE MANAGER
 // ══════════════════════════════════════════
 const Storage = {
@@ -814,6 +1029,10 @@ const Roulette = {
         // Desbloquear AudioContext (requer interação do usuário)
         Audio._getCtx();
 
+        // ── Verificar cadência do EventTimer ──
+        const timerCheck = EventTimer.check();
+        this._prizeBlocked = !timerCheck.allowed;
+
         const n          = prizes.length;
         const sliceAngle = (2 * Math.PI) / n;
 
@@ -891,8 +1110,20 @@ const Roulette = {
         this.canvas.classList.remove('spinning');
         document.getElementById('btn-spin').disabled = false;
 
-        // Registrar nas estatísticas
+        // ── Verificar se o prêmio estava bloqueado pelo EventTimer ──
+        if (this._prizeBlocked) {
+            this._prizeBlocked = false;
+            // Roleta girou normalmente mas não concede prêmio
+            document.getElementById('last-prize-name').textContent = '—';
+            Audio.tick();
+            setTimeout(() => Modal.showBlocked(), 400);
+            return;
+        }
+        this._prizeBlocked = false;
+
+        // Registrar nas estatísticas e no EventTimer
         Storage.recordSpin(winnerName);
+        EventTimer.recordPrize();
 
         // Atualizar display do último prêmio
         document.getElementById('last-prize-name').textContent = winnerName;
@@ -920,6 +1151,45 @@ const Modal = {
     hide() {
         document.getElementById('modal-result').classList.add('hidden');
         this._stopConfetti();
+    },
+
+    /** Exibido quando o EventTimer bloqueia o prêmio */
+    showBlocked() {
+        const modal    = document.getElementById('modal-result');
+        const prizeEl  = document.getElementById('modal-prize-name');
+        const titleEl  = document.getElementById('modal-title');
+        const subEl    = document.querySelector('.modal-subtitle');
+        const emojiEl  = document.querySelector('.modal-emoji');
+
+        // Salvar textos originais para restaurar depois
+        this._origTitle    = titleEl.textContent;
+        this._origSubtitle = subEl.textContent;
+        this._origEmoji    = emojiEl.textContent;
+
+        emojiEl.textContent  = '🎰';
+        titleEl.textContent  = 'Tente de novo!';
+        subEl.textContent    = 'Continue girando, um prêmio está chegando!';
+        prizeEl.textContent  = '';
+
+        modal.classList.remove('hidden');
+
+        // Auto-fechar em 2.5s
+        this._blockedTimeout = setTimeout(() => {
+            this._closeBlocked();
+        }, 2500);
+    },
+
+    _closeBlocked() {
+        clearTimeout(this._blockedTimeout);
+        const modal   = document.getElementById('modal-result');
+        const titleEl = document.getElementById('modal-title');
+        const subEl   = document.querySelector('.modal-subtitle');
+        const emojiEl = document.querySelector('.modal-emoji');
+        modal.classList.add('hidden');
+        // Restaurar textos originais
+        if (this._origTitle)    titleEl.textContent = this._origTitle;
+        if (this._origSubtitle) subEl.textContent   = this._origSubtitle;
+        if (this._origEmoji)    emojiEl.textContent  = this._origEmoji;
     },
 
     _startConfetti() {
@@ -1375,11 +1645,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── DASHBOARD ──────────────────────────
     if (page === 'dashboard') {
         Dashboard.init();
+        EventTimer.initDashboardUI();
     }
 
     // ── ROLETA ─────────────────────────────
     else if (page === 'roulette') {
         Roulette.onEnter();
+        EventTimer.initOperatorPanel();
 
         document.getElementById('btn-spin').addEventListener('click', () => Roulette.spin());
         document.getElementById('roulette-canvas').addEventListener('click', () => {

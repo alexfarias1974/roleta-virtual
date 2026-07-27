@@ -24,10 +24,27 @@
             <button class="btn btn-nav" id="btn-to-config" aria-label="Voltar para configurações">
                 ⚙️ Configurações
             </button>
-            <button class="btn btn-nav" id="btn-to-stats" aria-label="Ver estatísticas">
+            <!-- btn-to-stats mantido no DOM mas oculto ao público -->
+            <button class="btn btn-nav" id="btn-to-stats" aria-label="Ver estatísticas" style="display:none;">
                 📊 Estatísticas
             </button>
         </nav>
+
+        <!-- Painel do operador: cadência do evento (discreto, canto superior direito) -->
+        <div class="operator-panel" id="operator-panel" style="display:none;" aria-label="Painel do operador">
+            <div class="op-row">
+                <span class="op-dot" id="op-dot"></span>
+                <span class="op-label" id="op-status-text">Evento ativo</span>
+            </div>
+            <div class="op-row">
+                <span class="op-icon">🎁</span>
+                <span id="op-prizes-text">0 / 0 prêmios</span>
+            </div>
+            <div class="op-row">
+                <span class="op-icon">⏳</span>
+                <span id="op-time-text">--:--</span>
+            </div>
+        </div>
 
         <!-- Logo -->
         <div class="roulette-logo-area" id="roulette-logo-area">
