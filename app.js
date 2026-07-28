@@ -1033,32 +1033,36 @@ const Roulette = {
         Audio._getCtx();
 
         // ── Verificar cadência do EventTimer ──
-        const timerCheck = EventTimer.check();
-        this._prizeBlocked = !timerCheck.allowed;
+        const timerCheck     = EventTimer.check();
+        this._prizeBlocked   = !timerCheck.allowed;
 
         const n          = prizes.length;
         const sliceAngle = (2 * Math.PI) / n;
 
-        // Escolher vencedor aleatório
-        const winner = Math.floor(Math.random() * n);
+        let deltaAngle, winnerIdx;
 
-        // Calcular ângulo necessário para posicionar o vencedor no topo (ponteiro)
-        // Segmento i começa em: -π/2 + i * sliceAngle (canvas coords)
-        // Centro do segmento i: -π/2 + i * sliceAngle + sliceAngle/2
-        // Após rotação R (currentAngle), o segmento i está em: centro + R
-        // Para alinhar o vencedor ao topo (-π/2):
-        //   -π/2 + winner*sliceAngle + sliceAngle/2 + (currentAngle + deltaR) ≡ -π/2 (mod 2π)
-        //   winner*sliceAngle + sliceAngle/2 + currentAngle + deltaR ≡ 0 (mod 2π)
-        //   deltaR ≡ -(winner*sliceAngle + sliceAngle/2 + currentAngle) (mod 2π)
-        const needed    = -(winner * sliceAngle + sliceAngle / 2 + this.currentAngle);
-        let deltaAngle  = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        if (deltaAngle < 0.05) deltaAngle += 2 * Math.PI; // mínimo de movimento
+        if (this._prizeBlocked) {
+            // ── BLOQUEADO: parar na linha divisória entre duas fatias ──
+            // Escolher uma borda aleatória (entre fatia i e i+1)
+            const boundary = Math.floor(Math.random() * n);
+            // A borda i está em: -π/2 + boundary * sliceAngle (sem o /2 do centro)
+            const needed   = -(boundary * sliceAngle + this.currentAngle);
+            deltaAngle     = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            if (deltaAngle < 0.05) deltaAngle += 2 * Math.PI;
+            winnerIdx = -1; // sinaliza: nenhum prêmio
+        } else {
+            // ── LIBERADO: parar centrado num prêmio ──
+            winnerIdx      = Math.floor(Math.random() * n);
+            const needed   = -(winnerIdx * sliceAngle + sliceAngle / 2 + this.currentAngle);
+            deltaAngle     = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            if (deltaAngle < 0.05) deltaAngle += 2 * Math.PI;
+        }
 
         const minSpins   = 5 + Math.floor(Math.random() * 3); // 5 a 7 voltas completas
         const totalDelta = deltaAngle + minSpins * 2 * Math.PI;
         const duration   = (this.config.spinDuration || 5) * 1000; // ms
 
-        this._animate(this.currentAngle, this.currentAngle + totalDelta, duration, winner);
+        this._animate(this.currentAngle, this.currentAngle + totalDelta, duration, winnerIdx);
     },
 
     _animate(startAngle, endAngle, duration, winnerIdx) {
@@ -1096,7 +1100,11 @@ const Roulette = {
             } else {
                 this.currentAngle = endAngle;
                 this._draw();
-                this._onComplete(winnerIdx, prizes[winnerIdx]?.name || `Prêmio ${winnerIdx + 1}`);
+                // winnerIdx=-1 significa giro bloqueado (sem prêmio)
+                const winnerName = winnerIdx >= 0
+                    ? (prizes[winnerIdx]?.name || `Prêmio ${winnerIdx + 1}`)
+                    : '';
+                this._onComplete(winnerIdx, winnerName);
             }
         };
 
