@@ -318,7 +318,9 @@ const Storage = {
             // Garantir campos obrigatórios
             return {
                 logo:         cfg.logo         ?? null,
-                prizes:       Array.isArray(cfg.prizes) && cfg.prizes.length > 0 ? cfg.prizes : this._cloneDefault().prizes,
+                prizes:       Array.isArray(cfg.prizes) && cfg.prizes.length > 0
+                    ? cfg.prizes.map(p => ({ ...p, isWinner: p.isWinner ?? false }))
+                    : this._cloneDefault().prizes,
                 bgImage:      cfg.bgImage       ?? null,
                 bgColor:      cfg.bgColor       ?? '#000000',
                 spinDuration: cfg.spinDuration  ?? 5,
@@ -842,6 +844,7 @@ const Dashboard = {
             item.className = 'prize-item';
             item.setAttribute('role', 'listitem');
             item.style.animationDelay = `${idx * 0.04}s`;
+            const isWinner = prize.isWinner ?? false;
             item.innerHTML = `
                 <div class="prize-number">#${idx + 1}</div>
                 <input
@@ -859,6 +862,12 @@ const Dashboard = {
                     id="prize-color-${idx}"
                     title="Cor do segmento ${idx + 1}"
                     aria-label="Cor do prêmio ${idx + 1}">
+                <button
+                    class="prize-winner-toggle ${isWinner ? 'active' : ''}"
+                    id="prize-winner-${idx}"
+                    title="${isWinner ? 'Fatia de prêmio real (clique para desmarcar)' : 'Marcar como fatia de prêmio real'}"
+                    aria-label="Fatia de prêmio: ${isWinner ? 'ativa' : 'inativa'}"
+                    aria-pressed="${isWinner}">🏆</button>
             `;
             container.appendChild(item);
 
@@ -870,6 +879,12 @@ const Dashboard = {
             item.querySelector('.prize-color-input').addEventListener('input', (e) => {
                 this.config.prizes[idx].color = e.target.value;
                 this._saveAndPreview();
+            });
+
+            item.querySelector('.prize-winner-toggle').addEventListener('click', () => {
+                this.config.prizes[idx].isWinner = !this.config.prizes[idx].isWinner;
+                this._saveAndPreview();
+                this._renderPrizeList(); // re-render para atualizar visual
             });
         });
     },
@@ -1041,20 +1056,28 @@ const Roulette = {
 
         let deltaAngle, winnerIdx;
 
+        // Separar fatias marcadas como prêmio real das neutras
+        const winnerSlots  = prizes.map((p, i) => i).filter(i => prizes[i].isWinner);
+        const neutralSlots = prizes.map((p, i) => i).filter(i => !prizes[i].isWinner);
+
         if (this._prizeBlocked) {
-            // ── BLOQUEADO: parar na linha divisória entre duas fatias ──
-            // Escolher uma borda aleatória (entre fatia i e i+1)
-            const boundary = Math.floor(Math.random() * n);
-            // A borda i está em: -π/2 + boundary * sliceAngle (sem o /2 do centro)
-            const needed   = -(boundary * sliceAngle + this.currentAngle);
-            deltaAngle     = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            // ── BLOQUEADO: cair em fatia NEUTRA (não marcada como prêmio real) ──
+            // Se não houver fatias neutras, usa qualquer fatia que não seja vencedora
+            const pool = neutralSlots.length > 0 ? neutralSlots
+                       : prizes.map((_, i) => i); // fallback: qualquer fatia
+            const pick  = pool[Math.floor(Math.random() * pool.length)];
+            const needed = -(pick * sliceAngle + sliceAngle / 2 + this.currentAngle);
+            deltaAngle   = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
             if (deltaAngle < 0.05) deltaAngle += 2 * Math.PI;
             winnerIdx = -1; // sinaliza: nenhum prêmio
         } else {
-            // ── LIBERADO: parar centrado num prêmio ──
-            winnerIdx      = Math.floor(Math.random() * n);
-            const needed   = -(winnerIdx * sliceAngle + sliceAngle / 2 + this.currentAngle);
-            deltaAngle     = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            // ── LIBERADO: cair em fatia de PRÊMIO REAL (marcada com 🏆) ──
+            // Se nenhuma fatia estiver marcada, usa qualquer fatia
+            const pool  = winnerSlots.length > 0 ? winnerSlots
+                        : prizes.map((_, i) => i);
+            winnerIdx   = pool[Math.floor(Math.random() * pool.length)];
+            const needed = -(winnerIdx * sliceAngle + sliceAngle / 2 + this.currentAngle);
+            deltaAngle   = ((needed % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
             if (deltaAngle < 0.05) deltaAngle += 2 * Math.PI;
         }
 

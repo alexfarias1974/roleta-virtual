@@ -695,6 +695,35 @@ body {
     box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
 }
 
+/* Botão toggle: marcar fatia como prêmio real */
+.prize-winner-toggle {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    opacity: 0.35;
+}
+
+.prize-winner-toggle:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+.prize-winner-toggle.active {
+    background: rgba(251, 191, 36, 0.18);
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+    opacity: 1;
+}
+
 /* ── Background da Roleta ── */
 .bg-config {
     display: flex;
