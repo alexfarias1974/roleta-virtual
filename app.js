@@ -144,11 +144,13 @@ const EventTimer = {
 
     /**
      * Verifica se um prêmio pode ser concedido agora.
-     * Retorna { allowed: bool, nextInMs: number }
+     * Retorna { allowed: bool, nextInMs: number, noEvent: bool }
      */
     check() {
         const state = this.load();
-        if (!state || !state.active) return { allowed: true, nextInMs: 0 };
+
+        // Se não há evento ativo, bloquear e avisar o operador
+        if (!state || !state.active) return { allowed: false, nextInMs: 0, noEvent: true };
 
         const elapsed    = Date.now() - state.startTime;
         const { durationMs, totalPrizes, prizesGiven, offsets } = state;
@@ -159,12 +161,13 @@ const EventTimer = {
         // Todos os prêmios já foram dados
         if (prizesGiven >= totalPrizes) return { allowed: false, nextInMs: 0, finished: true };
 
-        // Calcular o timestamp esperado para o PRÓXIMO prêmio (índice = prizesGiven)
-        const interval    = durationMs / totalPrizes;
-        const nextIdx     = prizesGiven;
-        const baseTime    = interval * (nextIdx + 1);
-        const offset      = offsets[nextIdx] || 0;
-        const expectedAt  = baseTime + offset;
+        // Calcular o timestamp esperado para o PRÓXIMO prêmio
+        // nextIdx=0 => primeiro prêmio fica disponível após o primeiro intervalo
+        const interval   = durationMs / totalPrizes;
+        const nextIdx    = prizesGiven;
+        const baseTime   = interval * (nextIdx + 1);
+        const offset     = offsets[nextIdx] || 0;
+        const expectedAt = baseTime + offset;
 
         if (elapsed >= expectedAt) {
             return { allowed: true, nextInMs: 0 };
@@ -1113,10 +1116,15 @@ const Roulette = {
         // ── Verificar se o prêmio estava bloqueado pelo EventTimer ──
         if (this._prizeBlocked) {
             this._prizeBlocked = false;
-            // Roleta girou normalmente mas não concede prêmio
             document.getElementById('last-prize-name').textContent = '—';
             Audio.tick();
-            setTimeout(() => Modal.showBlocked(), 400);
+            const timerState = EventTimer.load();
+            if (!timerState || !timerState.active) {
+                // Evento não iniciado — avisar operador
+                setTimeout(() => Modal.showNoEvent(), 400);
+            } else {
+                setTimeout(() => Modal.showBlocked(), 400);
+            }
             return;
         }
         this._prizeBlocked = false;
@@ -1190,6 +1198,28 @@ const Modal = {
         if (this._origTitle)    titleEl.textContent = this._origTitle;
         if (this._origSubtitle) subEl.textContent   = this._origSubtitle;
         if (this._origEmoji)    emojiEl.textContent  = this._origEmoji;
+    },
+
+    /** Exibido quando o operador girou sem ter iniciado o evento */
+    showNoEvent() {
+        const modal   = document.getElementById('modal-result');
+        const prizeEl = document.getElementById('modal-prize-name');
+        const titleEl = document.getElementById('modal-title');
+        const subEl   = document.querySelector('.modal-subtitle');
+        const emojiEl = document.querySelector('.modal-emoji');
+
+        this._origTitle    = titleEl.textContent;
+        this._origSubtitle = subEl.textContent;
+        this._origEmoji    = emojiEl.textContent;
+
+        emojiEl.textContent = '⚙️';
+        titleEl.textContent = 'Evento não iniciado!';
+        subEl.textContent   = 'Acesse as Configurações e clique em "Iniciar Evento" antes de começar.';
+        prizeEl.textContent = '';
+
+        modal.classList.remove('hidden');
+
+        this._blockedTimeout = setTimeout(() => this._closeBlocked(), 3500);
     },
 
     _startConfetti() {
