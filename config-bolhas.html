@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <meta name="description" content="Dashboard de configuração do Estoure as Bolhas.">
+    <title>Estoure as Bolhas — Configurações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .header-back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .header-back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body data-page="config-bolhas">
+
+    <div id="view-dashboard" class="view active">
+        <div class="dashboard-container" style="position: relative;">
+            
+            <a href="index.html" class="header-back-btn">
+                <span>←</span> Voltar ao Hub
+            </a>
+
+            <!-- Cabeçalho -->
+            <header class="dashboard-header">
+                <div class="header-icon">🫧</div>
+                <h1 class="app-title">Estoure as Bolhas</h1>
+                <p class="app-subtitle">Configure a logomarca de fundo para o game</p>
+            </header>
+
+            <!-- 1. Logomarca do Contratante (Marca d'água) -->
+            <section class="config-section glass-card" aria-label="Logomarca do Contratante">
+                <h2 class="section-title"><span class="section-icon">🏢</span> Logomarca (Marca d'água)</h2>
+                <p class="section-hint">Envie a logo do cliente. Ela aparecerá enorme e translúcida no fundo do mar durante a partida.</p>
+                <div class="logo-upload-area" id="logo-drop-zone" role="button" tabindex="0" aria-label="Área de upload da logomarca">
+                    <div id="logo-preview-container" class="logo-preview hidden">
+                        <img id="logo-preview-img" src="" alt="Logo do contratante">
+                        <button class="btn-remove" id="btn-remove-logo" title="Remover logo" aria-label="Remover logo">✕</button>
+                    </div>
+                    <div id="logo-placeholder" class="upload-placeholder">
+                        <div class="upload-icon">🖼️</div>
+                        <p class="upload-main-text">Clique ou arraste a logo aqui</p>
+                        <p class="upload-hint">Formatos aceitos: PNG, JPG</p>
+                    </div>
+                    <input type="file" id="input-logo" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de logo">
+                </div>
+            </section>
+
+            <!-- Botões de Ação -->
+            <div class="dashboard-actions">
+                <button class="btn btn-primary btn-generate" id="btn-generate" aria-label="Salvar e Iniciar Jogo">
+                    🎮 Salvar e Jogar
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="bolhas-config.js"></script>
+</body>
+</html>

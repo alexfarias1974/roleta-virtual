@@ -1662,3 +1662,229 @@ body {
     font-size: 0.84rem;
 }
 
+/* ══════════════════════════════════════════
+   JOGO DA MEMÓRIA
+═══════════════════════════════════════════ */
+
+.memory-game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.memory-stats {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 25px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 12px 30px;
+    border-radius: 50px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.memory-stat-item {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.memory-stat-item span {
+    font-weight: 700;
+    color: var(--accent-purple);
+}
+
+.memory-grid {
+    display: grid;
+    gap: 15px;
+    justify-content: center;
+    perspective: 1000px;
+    width: 100%;
+}
+
+/* Tamanhos dinâmicos do grid dependendo do número de cartas, o JS pode ajustar */
+
+.memory-card {
+    position: relative;
+    width: 140px;
+    height: 190px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.memory-card.flip {
+    transform: rotateY(180deg);
+}
+
+.memory-card.matched {
+    transform: rotateY(180deg) scale(0.95);
+    opacity: 1;
+    pointer-events: none;
+}
+
+.memory-card.matched .memory-card-front::after {
+    content: '✔️';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(34, 197, 94, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: white;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 10;
+}
+
+.memory-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.memory-card-front {
+    transform: rotateY(180deg);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.memory-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.memory-card-back {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: rgba(255,255,255,0.5);
+    position: relative;
+}
+
+.memory-card-back::after {
+    content: '';
+    position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+    .memory-card {
+        width: 180px;
+        height: 250px;
+    }
+}
+
+/* ══════════════════════════════════════════
+   ESTOURE AS BOLHAS
+═══════════════════════════════════════════ */
+
+.bubble {
+    position: absolute;
+    bottom: -150px; /* Nasce escondida no fundo */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+    
+    /* Efeito de Vidro / Bolha de Sabão */
+    background: radial-gradient(110% 110% at 30% 30%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.1) 100%);
+    box-shadow: 
+        inset 10px 10px 20px rgba(255, 255, 255, 0.2),
+        inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+        0 4px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    
+    /* Reflexo brilhante */
+    overflow: hidden;
+}
+
+.bubble::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 20%;
+    width: 30%;
+    height: 30%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+    border-radius: 50%;
+    transform: rotate(-45deg);
+}
+
+.bubble-pos {
+    color: #fff;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.bubble-neg {
+    color: #f87171;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+    /* Tom mais avermelhado no vidro */
+    background: radial-gradient(110% 110% at 30% 30%, rgba(248, 113, 113, 0.3) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(248, 113, 113, 0.1) 100%);
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* Animação base de subida (adicionada via JS mas definida aqui) */
+@keyframes floatUp {
+    0% { bottom: -150px; opacity: 0; }
+    5% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { bottom: 110vh; opacity: 0; }
+}
+
+@keyframes wobble {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(40px); }
+}
+
+/* Animação ao estourar */
+.bubble.popped {
+    animation: popEffect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+    pointer-events: none;
+}
+
+@keyframes popEffect {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 0.8;
+        border-width: 4px;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+        border-width: 0;
+    }
+}

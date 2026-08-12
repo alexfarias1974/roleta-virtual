@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <meta name="description" content="Dashboard de configuração da roleta virtual interativa para eventos em totens.">
+    <title>Roleta Virtual — Configurações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="dashboard">
+
+    <div id="view-dashboard" class="view active">
+        <div class="dashboard-container" style="position: relative;">
+
+            <a href="index.html" class="header-back-btn">
+                <span>←</span> Voltar ao Hub
+            </a>
+
+            <!-- Cabeçalho -->
+            <header class="dashboard-header">
+                <div class="header-icon">🎡</div>
+                <h1 class="app-title">Roleta Virtual</h1>
+                <p class="app-subtitle">Configure sua roleta personalizada para o evento</p>
+            </header>
+
+            <!-- 1. Logomarca do Contratante -->
+            <section class="config-section glass-card" aria-label="Logomarca do Contratante">
+                <h2 class="section-title"><span class="section-icon">🏢</span> Logomarca do Contratante</h2>
+                <div class="logo-upload-area" id="logo-drop-zone" role="button" tabindex="0" aria-label="Área de upload da logomarca">
+                    <div id="logo-preview-container" class="logo-preview hidden">
+                        <img id="logo-preview-img" src="" alt="Logo do contratante">
+                        <button class="btn-remove" id="btn-remove-logo" title="Remover logo" aria-label="Remover logo">✕</button>
+                    </div>
+                    <div id="logo-placeholder" class="upload-placeholder">
+                        <div class="upload-icon">🖼️</div>
+                        <p class="upload-main-text">Clique ou arraste a logo aqui</p>
+                        <p class="upload-hint">Formatos aceitos: PNG, JPG</p>
+                    </div>
+                    <input type="file" id="input-logo" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de logo">
+                </div>
+            </section>
+
+            <!-- 2. Quantidade de Prêmios -->
+            <section class="config-section glass-card" aria-label="Quantidade de Prêmios">
+                <h2 class="section-title"><span class="section-icon">🎁</span> Quantidade de Prêmios</h2>
+                <div class="prize-count-control">
+                    <button class="btn-counter" id="btn-prize-down" aria-label="Diminuir quantidade de prêmios">▼</button>
+                    <div class="counter-display" aria-live="polite">
+                        <span id="prize-count-display" class="counter-number">3</span>
+                        <span class="counter-label">prêmios</span>
+                    </div>
+                    <button class="btn-counter" id="btn-prize-up" aria-label="Aumentar quantidade de prêmios">▲</button>
+                </div>
+                <p class="section-hint">Máximo de 10 prêmios</p>
+            </section>
+
+            <!-- 3. Paletas Pré-definidas -->
+            <section class="config-section glass-card" aria-label="Paletas de Cores Pré-definidas">
+                <h2 class="section-title"><span class="section-icon">🎨</span> Paletas Pré-definidas</h2>
+                <div class="palettes-grid" role="group" aria-label="Selecionar paleta de cores">
+                    <button class="palette-btn" data-palette="vibrantes" id="palette-vibrantes" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FF5733"></span>
+                            <span style="background:#FFC300"></span>
+                            <span style="background:#28B463"></span>
+                            <span style="background:#2E86C1"></span>
+                            <span style="background:#7D3C98"></span>
+                        </div>
+                        <span class="palette-name">Vibrantes</span>
+                    </button>
+                    <button class="palette-btn" data-palette="pasteis" id="palette-pasteis" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FADADD"></span>
+                            <span style="background:#FFF9C4"></span>
+                            <span style="background:#C8E6C9"></span>
+                            <span style="background:#BBDEFB"></span>
+                            <span style="background:#E1BEE7"></span>
+                        </div>
+                        <span class="palette-name">Pastéis</span>
+                    </button>
+                    <button class="palette-btn" data-palette="classicas" id="palette-classicas" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#C0392B"></span>
+                            <span style="background:#E67E22"></span>
+                            <span style="background:#F1C40F"></span>
+                            <span style="background:#27AE60"></span>
+                            <span style="background:#2980B9"></span>
+                        </div>
+                        <span class="palette-name">Clássicas</span>
+                    </button>
+                    <button class="palette-btn" data-palette="neon" id="palette-neon" aria-pressed="false">
+                        <div class="palette-preview" aria-hidden="true">
+                            <span style="background:#FF00FF"></span>
+                            <span style="background:#00FFFF"></span>
+                            <span style="background:#FF6600"></span>
+                            <span style="background:#00FF00"></span>
+                            <span style="background:#FF0066"></span>
+                        </div>
+                        <span class="palette-name">Neon</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. Nomes e Cores dos Prêmios -->
+            <section class="config-section glass-card" aria-label="Nomes e Cores dos Prêmios">
+                <h2 class="section-title"><span class="section-icon">✏️</span> Nomes e Cores dos Prêmios</h2>
+                <div class="prizes-list" id="prizes-list" role="list" aria-label="Lista de prêmios">
+                    <!-- Gerado dinamicamente pelo JavaScript -->
+                </div>
+            </section>
+
+            <!-- 5. Background da Roleta -->
+            <section class="config-section glass-card" aria-label="Background da Roleta">
+                <h2 class="section-title"><span class="section-icon">🖼️</span> Background da Roleta</h2>
+                <div class="bg-config">
+                    <div class="bg-upload-area" id="bg-drop-zone" role="button" tabindex="0" aria-label="Área de upload do background">
+                        <div id="bg-preview-container" class="bg-preview hidden">
+                            <img id="bg-preview-img" src="" alt="Preview do background">
+                            <button class="btn-remove" id="btn-remove-bg" title="Remover background" aria-label="Remover background">✕</button>
+                        </div>
+                        <div id="bg-placeholder" class="upload-placeholder small">
+                            <div class="upload-icon">🌄</div>
+                            <p class="upload-main-text">Clique ou arraste o background</p>
+                            <p class="upload-hint">PNG ou JPG · Será ajustado para 1080×1920</p>
+                        </div>
+                        <input type="file" id="input-bg" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de background">
+                    </div>
+                    <div class="bg-color-section">
+                        <label for="input-bg-color" class="color-label">Cor de fundo alternativa (padrão: preto):</label>
+                        <div class="color-input-row">
+                            <input type="color" id="input-bg-color" value="#000000" class="color-input-large" aria-label="Cor de fundo">
+                            <span id="bg-color-hex" class="hex-display">#000000</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Duração do Giro -->
+            <section class="config-section glass-card" aria-label="Duração do Giro">
+                <h2 class="section-title"><span class="section-icon">⏱️</span> Duração do Giro</h2>
+                <div class="duration-control">
+                    <div class="duration-labels">
+                        <span>3s</span>
+                        <span>10s</span>
+                    </div>
+                    <input type="range" id="input-duration" min="3" max="10" value="5" step="0.5"
+                           class="range-slider" aria-label="Duração do giro" aria-valuemin="3" aria-valuemax="10" aria-valuenow="5">
+                    <div class="duration-display">
+                        <span id="duration-display" class="duration-value">5</span>
+                        <span class="duration-unit">segundos</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Controle de Tempo do Evento -->
+            <section class="config-section glass-card" aria-label="Controle de Tempo do Evento">
+                <h2 class="section-title"><span class="section-icon">⏱️</span> Controle de Tempo do Evento</h2>
+                <p class="section-hint">Distribui os prêmios automaticamente ao longo da duração do evento, sem deixar acabar cedo nem sobrar no final.</p>
+
+                <div class="event-timer-form">
+                    <div class="config-form-group-row">
+                        <div class="config-form-group">
+                            <label class="color-label">Duração do Evento:</label>
+                            <div class="duration-inputs">
+                                <input type="number" id="input-event-hours" class="prize-name-input duration-input"
+                                    min="0" max="12" value="2" aria-label="Horas">
+                                <span class="duration-sep">h</span>
+                                <input type="number" id="input-event-minutes" class="prize-name-input duration-input"
+                                    min="0" max="59" value="30" aria-label="Minutos">
+                                <span class="duration-sep">min</span>
+                            </div>
+                        </div>
+                        <div class="config-form-group">
+                            <label for="input-event-total-prizes" class="color-label">Total de Prêmios a Distribuir:</label>
+                            <input type="number" id="input-event-total-prizes" class="prize-name-input"
+                                min="1" max="500" value="15" aria-label="Total de prêmios">
+                        </div>
+                    </div>
+                    <div class="event-timer-status" id="event-timer-status">
+                        <span class="timer-status-dot" id="timer-status-dot"></span>
+                        <span id="timer-status-text">Evento não iniciado</span>
+                    </div>
+                    <div class="event-timer-actions">
+                        <button class="btn btn-primary" id="btn-start-event" aria-label="Iniciar controle de tempo do evento">
+                            ▶ Iniciar Evento
+                        </button>
+                        <button class="btn btn-secondary" id="btn-stop-event" aria-label="Encerrar controle de tempo do evento" style="display:none;">
+                            ⏹ Encerrar Evento
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. Configurações de E-mail (Brevo API) -->
+            <section class="config-section glass-card accordion-section" aria-label="Configurações de E-mail">
+                <button class="accordion-header" id="btn-email-config-toggle" aria-expanded="false" aria-controls="email-config-body">
+                    <span class="accordion-title">
+                        <span class="section-icon">📧</span> Configurações de E-mail (Brevo)
+                    </span>
+                    <span class="accordion-chevron" aria-hidden="true">&#8250;</span>
+                </button>
+                <div class="accordion-body" id="email-config-body" hidden>
+                    <p class="section-hint">Configurações para envio automático e gratuito da planilha direta ao cliente (300 envios/dia grátis).</p>
+                    <div class="email-config-form">
+                        <div class="config-form-group">
+                            <label for="input-brevo-api-key" class="color-label">Chave de API Brevo (v3):</label>
+                            <input type="password" id="input-brevo-api-key" class="prize-name-input" placeholder="xkeysib-..." aria-label="Chave de API Brevo">
+                        </div>
+                        <div class="config-form-group-row">
+                            <div class="config-form-group">
+                                <label for="input-sender-email" class="color-label">E-mail do Remetente (Autorizado na Brevo):</label>
+                                <input type="email" id="input-sender-email" class="prize-name-input" placeholder="seu-email@dominio.com" aria-label="E-mail do remetente">
+                            </div>
+                            <div class="config-form-group">
+                                <label for="input-sender-name" class="color-label">Nome do Remetente:</label>
+                                <input type="text" id="input-sender-name" class="prize-name-input" placeholder="Ex: Evento Roleta" aria-label="Nome do remetente">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 8. Pré-visualização -->
+            <section class="config-section glass-card" aria-label="Pré-visualização da Roleta">
+                <h2 class="section-title"><span class="section-icon">👁️</span> Pré-visualização em Tempo Real</h2>
+                <div class="preview-container">
+                    <div class="preview-pointer-top" aria-hidden="true"></div>
+                    <canvas id="preview-canvas" width="420" height="420" aria-label="Pré-visualização da roleta"></canvas>
+                </div>
+            </section>
+
+            <!-- 8. Botões de Ação -->
+            <div class="dashboard-actions">
+                <button class="btn btn-secondary" id="btn-reset" aria-label="Resetar todas as configurações">
+                    🔄 Resetar
+                </button>
+                <button class="btn btn-primary btn-generate" id="btn-generate" aria-label="Gerar a roleta com as configurações atuais">
+                    🎡 Gerar Roleta
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Accordion: Configurações de E-mail (Brevo)
+        const emailToggleBtn = document.getElementById('btn-email-config-toggle');
+        const emailConfigBody = document.getElementById('email-config-body');
+
+        if (emailToggleBtn && emailConfigBody) {
+            emailToggleBtn.addEventListener('click', () => {
+                const isExpanded = emailToggleBtn.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    emailToggleBtn.setAttribute('aria-expanded', 'false');
+                    emailConfigBody.hidden = true;
+                } else {
+                    emailToggleBtn.setAttribute('aria-expanded', 'true');
+                    emailConfigBody.hidden = false;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

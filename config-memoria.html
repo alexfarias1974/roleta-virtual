@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <meta name="description" content="Dashboard de configuração do Jogo da Memória.">
+    <title>Jogo da Memória — Configurações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos adicionais específicos para o Jogo da Memória */
+        .cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .card-config-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: var(--r-md);
+            border: 1px solid var(--border-glass);
+        }
+        .card-number {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-purple);
+            width: 40px;
+        }
+        .card-upload-area {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .card-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--r-sm);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-preview-placeholder {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+        .card-upload-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .card-upload-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .header-back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .header-back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body data-page="config-memoria">
+
+    <div id="view-dashboard" class="view active">
+        <div class="dashboard-container" style="position: relative;">
+            
+            <a href="index.html" class="header-back-btn">
+                <span>←</span> Voltar ao Hub
+            </a>
+
+            <!-- Cabeçalho -->
+            <header class="dashboard-header">
+                <div class="header-icon">🧠</div>
+                <h1 class="app-title">Jogo da Memória</h1>
+                <p class="app-subtitle">Configure as cartas e o visual do jogo</p>
+            </header>
+
+            <!-- 1. Logomarca do Contratante -->
+            <section class="config-section glass-card" aria-label="Logomarca do Contratante">
+                <h2 class="section-title"><span class="section-icon">🏢</span> Logomarca do Contratante</h2>
+                <div class="logo-upload-area" id="logo-drop-zone" role="button" tabindex="0" aria-label="Área de upload da logomarca">
+                    <div id="logo-preview-container" class="logo-preview hidden">
+                        <img id="logo-preview-img" src="" alt="Logo do contratante">
+                        <button class="btn-remove" id="btn-remove-logo" title="Remover logo" aria-label="Remover logo">✕</button>
+                    </div>
+                    <div id="logo-placeholder" class="upload-placeholder">
+                        <div class="upload-icon">🖼️</div>
+                        <p class="upload-main-text">Clique ou arraste a logo aqui</p>
+                        <p class="upload-hint">Formatos aceitos: PNG, JPG</p>
+                    </div>
+                    <input type="file" id="input-logo" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de logo">
+                </div>
+            </section>
+
+            <!-- 2. Background do Jogo -->
+            <section class="config-section glass-card" aria-label="Background do Jogo">
+                <h2 class="section-title"><span class="section-icon">🖼️</span> Background do Jogo</h2>
+                <div class="bg-config">
+                    <div class="bg-upload-area" id="bg-drop-zone" role="button" tabindex="0" aria-label="Área de upload do background">
+                        <div id="bg-preview-container" class="bg-preview hidden">
+                            <img id="bg-preview-img" src="" alt="Preview do background">
+                            <button class="btn-remove" id="btn-remove-bg" title="Remover background" aria-label="Remover background">✕</button>
+                        </div>
+                        <div id="bg-placeholder" class="upload-placeholder small">
+                            <div class="upload-icon">🌄</div>
+                            <p class="upload-main-text">Clique ou arraste o background</p>
+                            <p class="upload-hint">PNG ou JPG · Será ajustado para 1080×1920</p>
+                        </div>
+                        <input type="file" id="input-bg" accept="image/png,image/jpeg" class="file-input-hidden" aria-label="Selecionar arquivo de background">
+                    </div>
+                    <div class="bg-color-section">
+                        <label for="input-bg-color" class="color-label">Cor de fundo alternativa (padrão: preto):</label>
+                        <div class="color-input-row">
+                            <input type="color" id="input-bg-color" value="#000000" class="color-input-large" aria-label="Cor de fundo">
+                            <span id="bg-color-hex" class="hex-display">#000000</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Quantidade de Pares -->
+            <section class="config-section glass-card" aria-label="Quantidade de Pares">
+                <h2 class="section-title"><span class="section-icon">🎴</span> Quantidade de Pares</h2>
+                <div class="prize-count-control">
+                    <button class="btn-counter" id="btn-pairs-down" aria-label="Diminuir quantidade de pares">▼</button>
+                    <div class="counter-display" aria-live="polite">
+                        <span id="pairs-count-display" class="counter-number">4</span>
+                        <span class="counter-label">pares</span>
+                    </div>
+                    <button class="btn-counter" id="btn-pairs-up" aria-label="Aumentar quantidade de pares">▲</button>
+                </div>
+                <p class="section-hint">Entre 2 e 10 pares (Total de cartas será o dobro).</p>
+            </section>
+
+            <!-- 4. Fotos das Cartas -->
+            <section class="config-section glass-card" aria-label="Fotos das Cartas">
+                <h2 class="section-title"><span class="section-icon">📸</span> Fotos das Cartas</h2>
+                <p class="section-hint">Faça o upload de uma imagem diferente para cada par do jogo.</p>
+                <div class="cards-list" id="cards-list" role="list" aria-label="Lista de cartas">
+                    <!-- Gerado dinamicamente pelo JavaScript -->
+                </div>
+            </section>
+
+            <!-- Botões de Ação -->
+            <div class="dashboard-actions">
+                <button class="btn btn-secondary" id="btn-reset" aria-label="Resetar todas as configurações">
+                    🔄 Resetar
+                </button>
+                <button class="btn btn-primary btn-generate" id="btn-generate" aria-label="Salvar e Iniciar Jogo">
+                    🎮 Salvar e Jogar
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="memoria-config.js"></script>
+</body>
+</html>

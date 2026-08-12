@@ -1719,7 +1719,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!Roulette.isSpinning) Roulette.spin();
         });
 
-        document.getElementById('btn-to-config').addEventListener('click', () => goTo('index.html'));
+        document.getElementById('btn-to-config').addEventListener('click', () => goTo('config-roleta.html'));
         document.getElementById('btn-to-stats').addEventListener('click',  () => goTo('estatisticas.html'));
 
         document.getElementById('btn-modal-close').addEventListener('click', () => Modal.hide());
@@ -1738,7 +1738,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Stats.onEnter();
 
         document.getElementById('btn-stats-to-roulette').addEventListener('click', () => goTo('roleta.html'));
-        document.getElementById('btn-stats-to-config').addEventListener('click',   () => goTo('index.html'));
+        document.getElementById('btn-stats-to-config').addEventListener('click',   () => goTo('config-roleta.html'));
         document.getElementById('btn-reset-stats').addEventListener('click',       () => Stats.reset());
 
         // Enviar por Email

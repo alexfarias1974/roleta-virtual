@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Estoure as Bolhas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            /* Fundo do Mar realista */
+            background-color: #001f3f;
+            background-image: url('fundo-mar.jpg');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            color: #fff;
+            margin: 0;
+            overflow: hidden; /* Impede scroll */
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Marca d'água do Cliente */
+        .watermark-logo {
+            position: absolute;
+            top: calc(50% - 150px);
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+            filter: grayscale(100%) contrast(200%);
+        }
+
+        /* Botão Voltar */
+        .btn-voltar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 1.1rem;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        .btn-voltar:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        /* HUD - Heads Up Display */
+        .hud-container {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 50;
+            pointer-events: none; /* Para não atrapalhar o clique nas bolhas */
+        }
+
+        .hud-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hud-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-top: -5px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: color 0.3s, transform 0.1s;
+        }
+
+        .score-positive { color: #4ade80; }
+        .score-negative { color: #f87171; }
+
+        /* Container do Game (onde as bolhas nascem) */
+        .game-area {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10;
+        }
+        
+        /* Modal - Ajustes de cor */
+        .modal-title.score-high { color: #4ade80; }
+        .modal-title.score-low { color: #f87171; }
+    </style>
+</head>
+<body>
+
+    <img id="game-logo" class="watermark-logo" src="" alt="" style="display: none;">
+
+    <div class="hud-container">
+        <div class="hud-box">
+            <span class="hud-label">Pontuação</span>
+            <span class="hud-value score-positive" id="score-display">0</span>
+        </div>
+        <div class="hud-box" style="border-color: #a855f7;">
+            <span class="hud-label">Tempo</span>
+            <span class="hud-value" id="timer-display" style="color: #a855f7;">30</span>
+        </div>
+    </div>
+
+    <div class="game-area" id="game-area">
+        <!-- Bolhas injetadas via JS -->
+    </div>
+
+    <a href="config-bolhas.html" class="btn-voltar">⚙️ Voltar às Configurações</a>
+    
+    <!-- Botão iniciar central (Start Overlay) -->
+    <div id="start-overlay" class="modal-overlay" style="z-index: 200;">
+        <div class="modal" style="text-align: center;">
+            <h2>Pronto para estourar?</h2>
+            <p style="margin: 15px 0; color: #ccc;">
+                Estoure os valores positivos para somar pontos e fuja dos negativos!<br>
+                Você tem <strong>30 segundos</strong>.
+            </p>
+            <button class="btn btn-primary" id="btn-start-game" style="font-size: 1.5rem; padding: 15px 40px; margin-top: 10px;">COMEÇAR!</button>
+        </div>
+    </div>
+
+    <!-- Modal de Resultado Final -->
+    <div id="modal-overlay" class="modal-overlay hidden" aria-hidden="true" style="z-index: 200;">
+        <div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+            <button class="modal-close" id="btn-modal-close" aria-label="Fechar popup">✕</button>
+            <div class="modal-header">
+                <div class="modal-icon">🫧</div>
+                <h2 class="modal-title" id="modal-title">Fim de Jogo!</h2>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="font-size: 1.2rem; margin-bottom: 5px;">Sua pontuação final:</p>
+                <h3 id="final-score" style="font-family: 'Outfit'; font-size: 4rem; margin: 0; line-height: 1;">0</h3>
+                <p style="margin-top: 15px; color: #9ca3af;">Você estourou <strong id="final-count">0</strong> bolhas.</p>
+                
+                <div class="modal-actions" style="margin-top: 25px;">
+                    <button class="btn btn-primary" id="btn-play-again" style="width: 100%;">Jogar Novamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="bolhas-game.js"></script>
+</body>
+</html>

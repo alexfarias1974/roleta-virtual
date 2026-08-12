@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: var(--bg-color, #0f0c29);
+            background-image: var(--bg-image, none);
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        .btn-voltar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 1.1rem;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .btn-voltar:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-50%) translateY(-2px);
+        }
+        .logo-cliente {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 500px;
+            max-height: 250px;
+            display: none;
+            z-index: 100;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+        }
+    </style>
+</head>
+<body>
+
+    <a href="config-memoria.html" class="btn-voltar">⚙️ Voltar às Configurações</a>
+    
+    <img id="game-logo" class="logo-cliente" src="" alt="Logo Cliente">
+
+    <div class="memory-game-area">
+        <div class="memory-stats">
+            <div class="memory-stat-item">
+                Tentativas: <span id="attempts-count">0</span>
+            </div>
+            <div class="memory-stat-item">
+                Pares Encontrados: <span id="matches-count">0</span> / <span id="total-pairs">0</span>
+            </div>
+        </div>
+
+        <div class="memory-grid" id="memory-grid">
+            <!-- Cartas geradas via JS -->
+        </div>
+    </div>
+
+    <!-- Modal de Vitória (reaproveitando estilos da roleta) -->
+    <div id="modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+            <button class="modal-close" id="btn-modal-close" aria-label="Fechar popup">✕</button>
+            <div class="modal-header">
+                <div class="modal-icon">🎉</div>
+                <h2 class="modal-title" id="modal-title">Parabéns!</h2>
+            </div>
+            <div class="modal-body">
+                <p>Você encontrou todos os pares em <strong id="final-attempts">0</strong> tentativas.</p>
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button class="btn btn-primary" id="btn-play-again" style="width: 100%;">Jogar Novamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opcional: Confete Script -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="memoria-game.js"></script>
+</body>
+</html>
