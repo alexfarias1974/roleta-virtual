@@ -342,6 +342,47 @@ body {
     gap: 32px;
 }
 
+/* Botão Voltar ao Hub */
+.header-back-btn {
+    position: absolute;
+    top: 36px;
+    left: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+}
+
+.header-back-btn:hover {
+    background: rgba(124, 58, 237, 0.22);
+    border-color: rgba(168, 85, 247, 0.45);
+    color: #ffffff;
+    transform: translateX(-4px);
+    box-shadow: 0 6px 24px rgba(124, 58, 237, 0.35);
+}
+
+.header-back-btn svg {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.header-back-btn:hover svg {
+    transform: translateX(-4px);
+}
+
 .dashboard-header {
     text-align: center;
     padding: 20px 0 10px;
@@ -1798,8 +1839,178 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   ESTOURE AS BOLHAS
+   CAÇA PALAVRAS (Premium UI)
 ═══════════════════════════════════════════ */
+
+/* Background Dinâmico do Caça Palavras */
+body[data-page="config-caca"], .caca-game-body {
+    background: radial-gradient(circle at top left, #0b071a, #04020a, #0f0a2a);
+    background-size: 200% 200%;
+    animation: gradientMove 15s ease infinite alternate;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+/* Glass Cards Específicos */
+.premium-glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.premium-glass:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Títulos Neon */
+.neon-title {
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    font-weight: 900;
+}
+
+/* Campos de Texto Modernos */
+.modern-input-group {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.modern-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 12px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    transition: all 0.3s;
+    outline: none;
+    border-radius: 6px 6px 0 0;
+}
+
+.modern-input:focus {
+    background: rgba(168, 85, 247, 0.1);
+    border-bottom-color: #00f2fe;
+    box-shadow: 0 10px 10px -10px rgba(0, 242, 254, 0.5);
+}
+
+/* Tabela do Jogo Premium */
+.caca-board {
+    background: rgba(10, 10, 15, 0.6);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 242, 254, 0.05);
+    padding: 15px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.caca-cell {
+    background: transparent;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.caca-cell:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: scale(1.1);
+    z-index: 2;
+}
+
+/* Estados da Célula */
+.caca-cell.selected {
+    background: rgba(0, 242, 254, 0.2);
+    color: #00f2fe;
+    box-shadow: 0 0 15px #00f2fe, inset 0 0 10px #00f2fe;
+    border: 1px solid #00f2fe;
+    transform: scale(1.15);
+    z-index: 5;
+}
+
+.caca-cell.found-cell {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    text-shadow: 0 0 10px rgba(52, 211, 153, 0.8);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.4), inset 0 0 10px rgba(34, 197, 94, 0.4);
+    border: 1px solid rgba(34, 197, 94, 0.6);
+    animation: foundPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes foundPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Painel Lateral (Palavras) */
+.hologram-panel {
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 3px solid #a855f7;
+    border-radius: 16px;
+    padding: 30px;
+    width: 320px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.word-hologram {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.word-hologram.found {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.word-hologram.found::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #4ade80, transparent);
+    animation: strikeThrough 0.5s forwards ease-out;
+}
+
+@keyframes strikeThrough {
+    0% { width: 0; opacity: 0; }
+    50% { opacity: 1; }
+    100% { width: 100%; opacity: 0.8; }
+}
 
 .bubble {
     position: absolute;

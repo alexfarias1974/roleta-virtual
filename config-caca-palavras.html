@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Caça Palavras — Configurar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #f5c842;
+            --gold-deep: #c9982a;
+            --emerald: #10b981;
+            --emerald-deep: #059669;
+            --bg: #0a0e0a;
+            --surface: #111811;
+            --surface2: #162016;
+            --border: rgba(245, 200, 66, 0.2);
+            --text: #f0eed8;
+            --text-muted: rgba(240, 238, 216, 0.55);
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        body {
+            background-image:
+                radial-gradient(circle at 15% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 10%, rgba(245, 200, 66, 0.07) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        /* ─── Layout ─── */
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 50px 30px 100px;
+        }
+
+        /* ─── Back link ─── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+            margin-bottom: 50px;
+        }
+        .back-link:hover { color: var(--gold); }
+        .back-link svg { width: 16px; height: 16px; }
+
+        /* ─── Hero Header ─── */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(245,200,66,0.1), rgba(245,200,66,0.05));
+            border: 1px solid rgba(245,200,66,0.3);
+            color: var(--gold);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            border-radius: 30px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(3.5rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 0.95;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #f0eed8 30%, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-weight: 400;
+        }
+
+        /* ─── Divider ─── */
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--emerald));
+            border-radius: 2px;
+            margin: 20px auto;
+        }
+
+        /* ─── Card ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-deep), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .card-num {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-deep), var(--gold));
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text);
+        }
+
+        .card-hint {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: -20px;
+            margin-bottom: 24px;
+        }
+
+        /* ─── Upload Zone ─── */
+        .upload-zone {
+            border: 2px dashed rgba(245, 200, 66, 0.25);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.02);
+            position: relative;
+        }
+        .upload-zone:hover {
+            border-color: var(--gold);
+            background: rgba(245,200,66,0.04);
+        }
+        .upload-zone svg { width: 42px; height: 42px; color: var(--gold-deep); margin-bottom: 12px; }
+        .upload-zone p { color: var(--text-muted); font-size: 0.95rem; }
+        .upload-zone strong { color: var(--gold); }
+        .file-input-hidden { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+        .logo-preview-wrap { display: none; text-align: center; }
+        .logo-preview-wrap img { max-height: 140px; max-width: 100%; border-radius: 8px; }
+        .btn-remove-logo {
+            margin-top: 12px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-remove-logo:hover { background: rgba(239,68,68,0.2); }
+
+        /* ─── Difficulty Selector ─── */
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .diff-btn {
+            border: 2px solid var(--border);
+            background: transparent;
+            border-radius: 12px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.25s;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .diff-btn:hover {
+            border-color: rgba(245,200,66,0.5);
+            color: var(--text);
+        }
+        .diff-btn.active {
+            border-color: var(--gold);
+            background: rgba(245,200,66,0.08);
+            color: var(--gold);
+        }
+        .diff-btn .diff-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+        .diff-btn .diff-name { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; display: block; }
+        .diff-btn .diff-desc { font-size: 0.78rem; color: inherit; line-height: 1.4; display: block; margin-top: 4px; opacity: 0.8; }
+
+        /* ─── Qty Selector ─── */
+        .qty-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .qty-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .qty-btn {
+            width: 46px; height: 46px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gold);
+            font-size: 1.4rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .qty-btn:hover { background: rgba(245,200,66,0.1); }
+        #word-count-display {
+            min-width: 60px;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--gold);
+            padding: 0 10px;
+            line-height: 46px;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        /* ─── Word Inputs ─── */
+        .words-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .word-field {
+            position: relative;
+        }
+        .word-field label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .word-field input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .word-field input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.1);
+        }
+        .word-field input::placeholder { letter-spacing: 1px; text-transform: none; opacity: 0.4; }
+
+        /* ─── CTA ─── */
+        .cta-wrap {
+            margin-top: 36px;
+            text-align: center;
+        }
+        .btn-play {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(135deg, var(--gold-deep) 0%, var(--gold) 100%);
+            color: #000;
+            border: none;
+            cursor: pointer;
+            padding: 22px 60px;
+            border-radius: 60px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 30px rgba(245, 200, 66, 0.3);
+        }
+        .btn-play:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(245, 200, 66, 0.45);
+        }
+        .btn-play:active { transform: translateY(0); }
+        .btn-play svg { width: 22px; height: 22px; }
+
+        /* ─── Select styled ─── */
+        select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5c842' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+        }
+        select:focus { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- Voltar -->
+    <a href="index.html" class="back-link">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Central de Games
+    </a>
+
+    <!-- Hero -->
+    <div class="hero">
+        <span class="hero-badge">&#9670; Jogo 04</span>
+        <h1>CAÇA<br>PALAVRAS</h1>
+        <div class="divider"></div>
+        <p class="hero-sub">Configure o tabuleiro antes de começar a partida</p>
+    </div>
+
+    <!-- Card 1: Logo -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-num">1</div>
+            <span class="card-title">Logomarca do Cliente</span>
+        </div>
+        <p class="card-hint">A logo aparecerá no topo do jogo durante a partida.</p>
+
+        <!-- Preview -->
+        <div class="logo-preview-wrap" id="logo-preview-wrap">
+            <img id="logo-preview-img" src="" alt="Logo">
+            <br>
+            <button class="btn-remove-logo" id="btn-remove-logo">Remover</button>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="logo-drop-zone">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18M9.75 9.75a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"/>
+            </svg>
+            <p><strong>Clique para enviar</strong> ou arraste a imagem aqui</p>
+            <p style="font-size: 0.8rem; margin-top: 6px;">PNG ou JPG — Max. 5MB</p>
+            <input type="file" id="input-logo" accept="image/png,image/jpeg" class="file-input-hidden">
+        </div>
+    </div>
+
+    <!-- Card 2: Dificuldade -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-num">2</div>
+            <span class="card-title">Nível de Dificuldade</span>
+        </div>
+        <div class="diff-grid">
+            <button class="diff-btn active" data-diff="easy" type="button">
+                <span class="diff-icon">🌱</span>
+                <span class="diff-name">Fácil</span>
+                <span class="diff-desc">Palavras na horizontal e vertical, ordem normal</span>
+            </button>
+            <button class="diff-btn" data-diff="medium" type="button">
+                <span class="diff-icon">🔥</span>
+                <span class="diff-name">Médio</span>
+                <span class="diff-desc">Horizontal, vertical e diagonal</span>
+            </button>
+            <button class="diff-btn" data-diff="hard" type="button">
+                <span class="diff-icon">💀</span>
+                <span class="diff-name">Difícil</span>
+                <span class="diff-desc">Todas as direções + palavras invertidas</span>
+            </button>
+        </div>
+        <input type="hidden" id="difficulty-select" value="easy">
+    </div>
+
+    <!-- Card 3: Quantidade e Palavras -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-num">3</div>
+            <span class="card-title">Palavras Escondidas</span>
+        </div>
+        <p class="card-hint" style="margin-bottom: 24px;">Escolha a quantidade de palavras e preencha todas elas.</p>
+
+        <div class="qty-row" style="margin-bottom: 32px;">
+            <span class="qty-label">Quantas palavras?</span>
+            <div class="qty-control">
+                <button class="qty-btn" id="qty-minus" type="button">−</button>
+                <div id="word-count-display">5</div>
+                <button class="qty-btn" id="qty-plus" type="button">+</button>
+            </div>
+        </div>
+
+        <div class="words-grid" id="words-container">
+            <!-- Gerado via JS -->
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+        <button class="btn-play" id="btn-generate" type="button">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+            </svg>
+            Iniciar Partida
+        </button>
+    </div>
+
+</div>
+<script src="caca-config.js"></script>
+</body>
+</html>

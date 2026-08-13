@@ -10,26 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        .header-back-btn {
-            position: absolute;
-            left: 20px;
-            top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            border-radius: var(--r-sm);
-            cursor: pointer;
-            text-decoration: none;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-        .header-back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
     </style>
 </head>
 <body data-page="config-bolhas">
@@ -38,7 +18,11 @@
         <div class="dashboard-container" style="position: relative;">
             
             <a href="index.html" class="header-back-btn">
-                <span>←</span> Voltar ao Hub
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar ao Hub</span>
             </a>
 
             <!-- Cabeçalho -->
