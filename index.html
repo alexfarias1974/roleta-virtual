@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1080, initial-scale=1.0">
     <meta name="description" content="Central de Games Interativa">
-    <title>Central de Games</title>
+    <title>Game Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -23,15 +23,32 @@
             width: 90%;
             max-width: 900px;
             text-align: center;
+            padding: 40px 0;
         }
         .hub-header {
             margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hub-logo {
+            width: 140px;
+            height: 140px;
+            border-radius: 28px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(168, 85, 247, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .hub-logo:hover {
+            transform: scale(1.05);
         }
         .hub-title {
             font-family: 'Outfit', sans-serif;
             font-size: 3.5rem;
             font-weight: 800;
-            background: linear-gradient(90deg, #a855f7, #ec4899);
+            background: linear-gradient(90deg, #a855f7, #ec4899, #00f2fe);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
@@ -96,7 +113,8 @@
 <body data-page="hub">
     <div class="hub-container">
         <header class="hub-header">
-            <h1 class="hub-title">Central de Games</h1>
+            <img src="logo-game-center.jpg" alt="Game Center Logo" class="hub-logo">
+            <h1 class="hub-title">Game Center</h1>
             <p class="hub-subtitle">Escolha um jogo para configurar e iniciar</p>
         </header>
 
