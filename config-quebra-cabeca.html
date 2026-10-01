@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Quebra-Cabeça — Configurar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cyan: #00f2fe;
+            --cyan-deep: #4facfe;
+            --purple: #a855f7;
+            --purple-deep: #7c3aed;
+            --bg: #070913;
+            --surface: #0d1224;
+            --surface2: #131b36;
+            --border: rgba(0, 242, 254, 0.2);
+            --border-hover: rgba(0, 242, 254, 0.45);
+            --text: #f0f4fc;
+            --text-muted: rgba(240, 244, 252, 0.55);
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        body {
+            background-image:
+                radial-gradient(circle at 15% 85%, rgba(0, 242, 254, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 10%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 50px 30px 100px;
+        }
+
+        /* ─── Back link ─── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+            margin-bottom: 50px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+        }
+        .back-link:hover { color: var(--cyan); border-color: var(--cyan); background: rgba(0, 242, 254, 0.1); }
+        .back-link svg { width: 16px; height: 16px; transition: transform 0.2s; }
+        .back-link:hover svg { transform: translateX(-4px); }
+
+        /* ─── Hero Header ─── */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(0,242,254,0.1), rgba(168,85,247,0.1));
+            border: 1px solid rgba(0,242,254,0.3);
+            color: var(--cyan);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            border-radius: 30px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(3.5rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 0.95;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #f0f4fc 30%, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-weight: 400;
+        }
+
+        /* ─── Cards ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 38px 40px;
+            margin-bottom: 30px;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--border-hover); }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 40px; right: 40px; height: 2px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), transparent);
+            border-radius: 2px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .card-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 2px;
+        }
+
+        .card-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── Upload Area ─── */
+        .dropzone {
+            border: 2px dashed rgba(0, 242, 254, 0.25);
+            border-radius: 14px;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(0, 242, 254, 0.02);
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--cyan);
+            background: rgba(0, 242, 254, 0.06);
+        }
+        .dropzone input[type="file"] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+        .dropzone-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .dropzone-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .dropzone-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .preview-box {
+            margin-top: 20px;
+            display: none;
+            align-items: center;
+            gap: 20px;
+            padding: 16px;
+            background: var(--surface2);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .preview-box.active { display: flex; }
+        .preview-thumb {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .preview-info { flex: 1; text-align: left; }
+        .preview-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .preview-status {
+            font-size: 0.8rem;
+            color: #10b981;
+            font-family: 'Space Mono', monospace;
+        }
+        .btn-remove-img {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-remove-img:hover { background: #ef4444; color: white; }
+
+        /* Presets */
+        .preset-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 20px 0 10px;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .preset-btn {
+            position: relative;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 16/10;
+            background: #000;
+            transition: all 0.2s;
+        }
+        .preset-btn img {
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.7; transition: opacity 0.2s;
+        }
+        .preset-btn:hover img, .preset-btn.active img { opacity: 1; }
+        .preset-btn.active {
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+        .preset-name {
+            position: absolute;
+            bottom: 0; inset-inline: 0;
+            background: rgba(0,0,0,0.7);
+            font-size: 0.75rem;
+            font-family: 'Space Mono', monospace;
+            padding: 4px;
+            text-align: center;
+            color: #fff;
+        }
+
+        /* ─── Dificuldades ─── */
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .diff-opt {
+            position: relative;
+            cursor: pointer;
+        }
+        .diff-opt input[type="radio"] { position: absolute; opacity: 0; }
+        .diff-box {
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 24px 18px;
+            text-align: center;
+            background: var(--surface2);
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .diff-opt:hover .diff-box {
+            border-color: rgba(0, 242, 254, 0.4);
+            background: rgba(0, 242, 254, 0.05);
+        }
+        .diff-opt input:checked + .diff-box {
+            border-color: var(--cyan);
+            background: rgba(0, 242, 254, 0.1);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+        }
+        .diff-icon { font-size: 2rem; margin-bottom: 4px; }
+        .diff-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .diff-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* ─── Opções Extras ─── */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .option-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-toggle:hover {
+            border-color: rgba(0, 242, 254, 0.3);
+        }
+        .toggle-info h4 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .toggle-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .3s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 18px; width: 18px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--cyan); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* ─── Botão Jogar ─── */
+        .btn-launch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, var(--cyan-deep), var(--cyan));
+            color: #050b14;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.35);
+            margin-top: 40px;
+        }
+        .btn-launch:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 15px 40px rgba(0, 242, 254, 0.5);
+            filter: brightness(1.1);
+        }
+        .btn-launch svg { width: 24px; height: 24px; }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <!-- Voltar ao Hub -->
+    <a href="index.html" class="back-link">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+        </svg>
+        Voltar ao Hub
+    </a>
+
+    <!-- Header Hero -->
+    <header class="hero">
+        <div class="hero-badge">🎮 Jogo 05 • Raciocínio & Agilidade</div>
+        <h1>QUEBRA<br>CABEÇA</h1>
+        <p class="hero-sub">Configure a imagem personalizada e o nível de desafio para o totem.</p>
+    </header>
+
+    <!-- CARD 1: Imagem do Quebra-Cabeça -->
+    <section class="card">
+        <div class="card-header">
+            <span class="card-num">01</span>
+            <h2 class="card-title">Imagem do Quebra-Cabeça</h2>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp">
+            <span class="dropzone-icon">🖼️</span>
+            <div class="dropzone-title">Toque ou arraste a imagem do cliente</div>
+            <div class="dropzone-hint">Formatos aceitos: JPG, PNG, WEBP (Recomendado 1080x1080 ou 16:9)</div>
+        </div>
+
+        <div class="preview-box" id="preview-box">
+            <img src="" alt="Preview da Imagem" class="preview-thumb" id="preview-img">
+            <div class="preview-info">
+                <div class="preview-name" id="preview-filename">imagem-personalizada.jpg</div>
+                <div class="preview-status">✓ Imagem carregada e pronta</div>
+            </div>
+            <button class="btn-remove-img" id="btn-remove-img">Remover</button>
+        </div>
+
+        <div class="preset-label">Ou escolha uma imagem de demonstração:</div>
+        <div class="presets-grid">
+            <button type="button" class="preset-btn active" data-src="logo-game-center.jpg">
+                <img src="logo-game-center.jpg" alt="Logo Game Center">
+                <span class="preset-name">Game Center 3D</span>
+            </button>
+            <button type="button" class="preset-btn" data-src="fundo-mar.jpg">
+                <img src="fundo-mar.jpg" alt="Fundo do Mar">
+                <span class="preset-name">Fundo do Mar</span>
+            </button>
+            <button type="button" class="preset-btn" data-src="bg-hub.jpg">
+                <img src="bg-hub.jpg" alt="Circuitos Néon">
+                <span class="preset-name">Circuitos Néon</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- CARD 2: Nível de Dificuldade -->
+    <section class="card">
+        <div class="card-header">
+            <span class="card-num">02</span>
+            <h2 class="card-title">Nível de Dificuldade</h2>
+        </div>
+
+        <div class="diff-grid">
+            <label class="diff-opt">
+                <input type="radio" name="difficulty" value="easy" checked>
+                <div class="diff-box">
+                    <span class="diff-icon">⚡</span>
+                    <span class="diff-name">FÁCIL</span>
+                    <span class="diff-desc">Grade 3x3 • 9 peças<br>Rápido e dinâmico</span>
+                </div>
+            </label>
+
+            <label class="diff-opt">
+                <input type="radio" name="difficulty" value="medium">
+                <div class="diff-box">
+                    <span class="diff-icon">🧩</span>
+                    <span class="diff-name">MÉDIO</span>
+                    <span class="diff-desc">Grade 4x4 • 16 peças<br>Desafio equilibrado</span>
+                </div>
+            </label>
+
+            <label class="diff-opt">
+                <input type="radio" name="difficulty" value="hard">
+                <div class="diff-box">
+                    <span class="diff-icon">🔥</span>
+                    <span class="diff-name">DIFÍCIL</span>
+                    <span class="diff-desc">Grade 5x5 • 25 peças<br>Para mestres</span>
+                </div>
+            </label>
+        </div>
+    </section>
+
+    <!-- CARD 3: Recursos Adicionais -->
+    <section class="card">
+        <div class="card-header">
+            <span class="card-num">03</span>
+            <h2 class="card-title">Recursos de Apoio ao Jogador</h2>
+        </div>
+
+        <div class="options-grid">
+            <div class="option-toggle">
+                <div class="toggle-info">
+                    <h4>Botão "Espiar Imagem"</h4>
+                    <p>Permite ver o preview original</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="opt-peek" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="option-toggle">
+                <div class="toggle-info">
+                    <h4>Numeração de Ajuda</h4>
+                    <p>Exibe números nas peças</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="opt-numbers">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão Iniciar -->
+    <button class="btn-launch" id="btn-save-launch">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+        </svg>
+        Salvar e Iniciar Jogo
+    </button>
+
+</div>
+
+<script src="quebra-cabeca-config.js"></script>
+</body>
+</html>

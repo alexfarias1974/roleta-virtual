@@ -51,6 +51,9 @@ const DEFAULT_CONFIG = {
     brevoApiKey: '',
     senderEmail: '',
     senderName: '',
+    eventHours: 2,
+    eventMinutes: 30,
+    eventTotalPrizes: 15,
 };
 
 // ══════════════════════════════════════════
@@ -108,12 +111,14 @@ const EventTimer = {
     },
 
     /** Inicia o evento */
-    start(durationMs, totalPrizes) {
+    start(durationMs, totalPrizes, hours, mins) {
         const state = {
             active:       true,
             startTime:    Date.now(),
             durationMs,
             totalPrizes,
+            hours:        hours !== undefined ? hours : Math.floor(durationMs / 3600000),
+            mins:         mins !== undefined ? mins : Math.floor((durationMs % 3600000) / 60000),
             prizesGiven:  0,
             // Pré-calcular variação aleatória por prêmio (±10% da janela por prêmio)
             offsets:      this._buildOffsets(totalPrizes, durationMs),
@@ -162,12 +167,13 @@ const EventTimer = {
         if (prizesGiven >= totalPrizes) return { allowed: false, nextInMs: 0, finished: true };
 
         // Calcular o timestamp esperado para o PRÓXIMO prêmio
-        // nextIdx=0 => primeiro prêmio fica disponível após o primeiro intervalo
+        // O primeiro prêmio (nextIdx = 0) fica liberado imediatamente no início do evento
+        // Os demais são espaçados proporcionalmente ao longo do tempo do evento
         const interval   = durationMs / totalPrizes;
         const nextIdx    = prizesGiven;
-        const baseTime   = interval * (nextIdx + 1);
-        const offset     = offsets[nextIdx] || 0;
-        const expectedAt = baseTime + offset;
+        const baseTime   = interval * nextIdx;
+        const offset     = (offsets && offsets[nextIdx]) || 0;
+        const expectedAt = Math.max(0, baseTime + offset);
 
         if (elapsed >= expectedAt) {
             return { allowed: true, nextInMs: 0 };
@@ -213,43 +219,130 @@ const EventTimer = {
 
     // ─── Dashboard UI ─────────────────────────
     initDashboardUI() {
-        const state = this.load();
-        const startBtn = document.getElementById('btn-start-event');
-        const stopBtn  = document.getElementById('btn-stop-event');
-        if (!startBtn || !stopBtn) return;
+        const state      = this.load();
+        const startBtn   = document.getElementById('btn-start-event');
+        const restartBtn = document.getElementById('btn-restart-event');
+        const stopBtn    = document.getElementById('btn-stop-event');
+        const resetBtn   = document.getElementById('btn-reset-event');
+        const randomBtn  = document.getElementById('btn-random-event');
+        const hInput     = document.getElementById('input-event-hours');
+        const mInput     = document.getElementById('input-event-minutes');
+        const pInput     = document.getElementById('input-event-total-prizes');
 
+        if (!startBtn) return;
+
+        // Se há um evento ativo, sincroniza os inputs com os dados do evento ativo
         if (state && state.active) {
+            if (state.hours !== undefined && hInput) hInput.value = state.hours;
+            if (state.mins  !== undefined && mInput) mInput.value = state.mins;
+            if (state.totalPrizes && pInput) pInput.value = state.totalPrizes;
             this._setDashboardActive(true, state);
+        } else {
+            this._setDashboardActive(false, null);
         }
 
-        startBtn.addEventListener('click', () => {
-            const hours   = parseInt(document.getElementById('input-event-hours').value)   || 0;
-            const mins    = parseInt(document.getElementById('input-event-minutes').value)  || 0;
-            const prizes  = parseInt(document.getElementById('input-event-total-prizes').value) || 15;
+        const triggerStart = (isRestart = false) => {
+            const hours   = Math.max(0, parseInt(hInput?.value)   || 0);
+            const mins    = Math.max(0, Math.min(59, parseInt(mInput?.value) || 0));
+            const prizes  = Math.max(1, parseInt(pInput?.value)   || 15);
             const durMs   = (hours * 60 + mins) * 60 * 1000;
-            if (durMs <= 0) { alert('Defina uma duração válida para o evento.'); return; }
+            if (durMs <= 0) { alert('Defina uma duração válida para o evento (mínimo 1 minuto).'); return; }
             if (prizes <= 0) { alert('Defina ao menos 1 prêmio.'); return; }
-            const s = this.start(durMs, prizes);
-            this._setDashboardActive(true, s);
-        });
 
-        stopBtn.addEventListener('click', () => {
-            if (!confirm('Encerrar o controle de tempo do evento?')) return;
-            this.stop();
-            this._setDashboardActive(false, null);
-        });
+            // Salvar no config permanente
+            const cfg = Storage.loadConfig();
+            cfg.eventHours = hours;
+            cfg.eventMinutes = mins;
+            cfg.eventTotalPrizes = prizes;
+            Storage.saveConfig(cfg);
+            if (Dashboard && Dashboard.config) {
+                Dashboard.config.eventHours = hours;
+                Dashboard.config.eventMinutes = mins;
+                Dashboard.config.eventTotalPrizes = prizes;
+            }
+
+            const s = this.start(durMs, prizes, hours, mins);
+            this._setDashboardActive(true, s);
+        };
+
+        startBtn.addEventListener('click', () => triggerStart(false));
+
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                if (!confirm('Deseja reiniciar o evento com os novos valores configurados? O tempo e contagem de prêmios começarão do zero.')) return;
+                triggerStart(true);
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (!confirm('Deseja zerar o evento? Os contadores e histórico deste evento serão reiniciados.')) return;
+                this.stop();
+                this._setDashboardActive(false, null);
+                const dot  = document.getElementById('timer-status-dot');
+                const text = document.getElementById('timer-status-text');
+                if (dot) dot.className = 'timer-status-dot inactive';
+                if (text) text.textContent = 'Evento zerado. Pronto para iniciar novo período.';
+            });
+        }
+
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                if (!confirm('Encerrar o controle de tempo do evento?')) return;
+                this.stop();
+                this._setDashboardActive(false, null);
+            });
+        }
+
+        if (randomBtn) {
+            randomBtn.addEventListener('click', () => {
+                // Gerar valores aleatórios: horas (1 a 5), minutos (0, 15, 30, 45), prêmios (5 a 30)
+                const randHours = Math.floor(Math.random() * 5) + 1; // 1 a 5 horas
+                const minOptions = [0, 15, 30, 45];
+                const randMins = minOptions[Math.floor(Math.random() * minOptions.length)];
+                const prizeOptions = [5, 7, 8, 10, 12, 14, 15, 18, 20, 25, 30];
+                const randPrizes = prizeOptions[Math.floor(Math.random() * prizeOptions.length)];
+
+                if (hInput) hInput.value = randHours;
+                if (mInput) mInput.value = randMins;
+                if (pInput) pInput.value = randPrizes;
+
+                // Salvar no storage
+                const cfg = Storage.loadConfig();
+                cfg.eventHours = randHours;
+                cfg.eventMinutes = randMins;
+                cfg.eventTotalPrizes = randPrizes;
+                Storage.saveConfig(cfg);
+                if (Dashboard && Dashboard.config) {
+                    Dashboard.config.eventHours = randHours;
+                    Dashboard.config.eventMinutes = randMins;
+                    Dashboard.config.eventTotalPrizes = randPrizes;
+                }
+
+                const text = document.getElementById('timer-status-text');
+                if (text && (!this.load() || !this.load().active)) {
+                    text.textContent = `🎲 Valores sugeridos: ${randHours}h ${randMins}min • ${randPrizes} prêmios. Clique em "Iniciar Evento" para começar.`;
+                }
+            });
+        }
 
         // Atualizar status a cada segundo
+        if (this._tickInterval) clearInterval(this._tickInterval);
         this._tickInterval = setInterval(() => this._updateDashboardStatus(), 1000);
         this._updateDashboardStatus();
     },
 
     _setDashboardActive(active, state) {
-        const startBtn = document.getElementById('btn-start-event');
-        const stopBtn  = document.getElementById('btn-stop-event');
-        if (!startBtn || !stopBtn) return;
-        startBtn.style.display = active ? 'none'  : '';
-        stopBtn.style.display  = active ? ''      : 'none';
+        const startBtn   = document.getElementById('btn-start-event');
+        const restartBtn = document.getElementById('btn-restart-event');
+        const stopBtn    = document.getElementById('btn-stop-event');
+        const resetBtn   = document.getElementById('btn-reset-event');
+
+        if (startBtn)   startBtn.style.display   = active ? 'none' : '';
+        if (restartBtn) restartBtn.style.display = active ? ''     : 'none';
+        if (stopBtn)    stopBtn.style.display    = active ? ''     : 'none';
+        if (resetBtn)   resetBtn.style.display   = '';
+
         this._updateDashboardStatus();
     },
 
@@ -260,17 +353,19 @@ const EventTimer = {
         const s = this.summary();
         if (!s) {
             dot.className = 'timer-status-dot inactive';
-            text.textContent = 'Evento não iniciado';
+            if (!text.textContent.includes('zerado') && !text.textContent.includes('Valores sugeridos')) {
+                text.textContent = 'Evento não iniciado';
+            }
             return;
         }
         const { allowed, prizesGiven, totalPrizes, remaining, nextInMs } = s;
         dot.className = 'timer-status-dot ' + (allowed ? 'ok' : 'hold');
         const remStr = this.formatMs(remaining);
         if (allowed) {
-            text.textContent = `✅ Prêmio liberado! | ${prizesGiven}/${totalPrizes} dados | Restam: ${remStr}`;
+            text.textContent = `✅ Prêmio liberado para o próximo giro! | ${prizesGiven}/${totalPrizes} distribuídos | Restam: ${remStr}`;
         } else {
             const nextStr = this.formatMs(nextInMs);
-            text.textContent = `⏳ Aguarde ${nextStr} | ${prizesGiven}/${totalPrizes} dados | Restam: ${remStr}`;
+            text.textContent = `⏳ Próximo prêmio em ${nextStr} | ${prizesGiven}/${totalPrizes} distribuídos | Restam: ${remStr}`;
         }
     },
 
@@ -327,6 +422,9 @@ const Storage = {
                 brevoApiKey:  cfg.brevoApiKey   ?? '',
                 senderEmail:  cfg.senderEmail   ?? '',
                 senderName:   cfg.senderName    ?? '',
+                eventHours:   cfg.eventHours    !== undefined ? Number(cfg.eventHours) : 2,
+                eventMinutes: cfg.eventMinutes  !== undefined ? Number(cfg.eventMinutes) : 30,
+                eventTotalPrizes: cfg.eventTotalPrizes !== undefined ? Number(cfg.eventTotalPrizes) : 15,
             };
         } catch (e) {
             console.warn('[Storage] Erro ao carregar config:', e);
@@ -737,6 +835,32 @@ const Dashboard = {
             this._saveAndPreview();
         });
 
+        // Sincronização em tempo real dos campos do Event Timer
+        const hInput = document.getElementById('input-event-hours');
+        const mInput = document.getElementById('input-event-minutes');
+        const pInput = document.getElementById('input-event-total-prizes');
+        const saveEventInputs = () => {
+            const h = Math.max(0, parseInt(hInput?.value) || 0);
+            const m = Math.max(0, Math.min(59, parseInt(mInput?.value) || 0));
+            const p = Math.max(1, parseInt(pInput?.value) || 1);
+            this.config.eventHours = h;
+            this.config.eventMinutes = m;
+            this.config.eventTotalPrizes = p;
+            Storage.saveConfig(this.config);
+        };
+        if (hInput) {
+            hInput.addEventListener('input', saveEventInputs);
+            hInput.addEventListener('change', saveEventInputs);
+        }
+        if (mInput) {
+            mInput.addEventListener('input', saveEventInputs);
+            mInput.addEventListener('change', saveEventInputs);
+        }
+        if (pInput) {
+            pInput.addEventListener('input', saveEventInputs);
+            pInput.addEventListener('change', saveEventInputs);
+        }
+
         // Botões principais
         document.getElementById('btn-generate').addEventListener('click', () => this._generate());
         document.getElementById('btn-reset').addEventListener('click',    () => this._reset());
@@ -922,6 +1046,14 @@ const Dashboard = {
         document.getElementById('input-duration').value            = this.config.spinDuration || 5;
         document.getElementById('duration-display').textContent    = this.config.spinDuration || 5;
 
+        // Configurações do Evento (duração e prêmios)
+        const hInput = document.getElementById('input-event-hours');
+        const mInput = document.getElementById('input-event-minutes');
+        const pInput = document.getElementById('input-event-total-prizes');
+        if (hInput) hInput.value = this.config.eventHours !== undefined ? this.config.eventHours : 2;
+        if (mInput) mInput.value = this.config.eventMinutes !== undefined ? this.config.eventMinutes : 30;
+        if (pInput) pInput.value = this.config.eventTotalPrizes !== undefined ? this.config.eventTotalPrizes : 15;
+
         // Configurações Brevo
         document.getElementById('input-brevo-api-key').value       = this.config.brevoApiKey || '';
         document.getElementById('input-sender-email').value        = this.config.senderEmail || '';
@@ -958,6 +1090,15 @@ const Dashboard = {
             alert('Por favor, insira pelo menos um nome de prêmio antes de gerar a roleta.');
             return;
         }
+
+        // Assegurar que os inputs de evento também são persistidos
+        const hInput = document.getElementById('input-event-hours');
+        const mInput = document.getElementById('input-event-minutes');
+        const pInput = document.getElementById('input-event-total-prizes');
+        if (hInput) this.config.eventHours = parseInt(hInput.value) || 0;
+        if (mInput) this.config.eventMinutes = parseInt(mInput.value) || 0;
+        if (pInput) this.config.eventTotalPrizes = parseInt(pInput.value) || 15;
+
         Storage.saveConfig(this.config);
         goTo('roleta.html');
     },
@@ -976,6 +1117,17 @@ const Dashboard = {
         document.getElementById('bg-color-hex').textContent     = '#000000';
         document.getElementById('input-duration').value         = 5;
         document.getElementById('duration-display').textContent = '5';
+
+        const hInput = document.getElementById('input-event-hours');
+        const mInput = document.getElementById('input-event-minutes');
+        const pInput = document.getElementById('input-event-total-prizes');
+        if (hInput) hInput.value = 2;
+        if (mInput) mInput.value = 30;
+        if (pInput) pInput.value = 15;
+
+        EventTimer.stop();
+        EventTimer._setDashboardActive(false, null);
+
         document.querySelectorAll('.palette-btn').forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-pressed', 'false');

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Quebra-Cabeça — Game Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cyan: #00f2fe;
+            --cyan-deep: #4facfe;
+            --purple: #a855f7;
+            --purple-deep: #7c3aed;
+            --emerald: #10b981;
+            --bg: #060813;
+            --surface: #0c1022;
+            --surface2: #121833;
+            --border: rgba(0, 242, 254, 0.2);
+            --text: #f0f4fc;
+            --text-dim: rgba(240, 244, 252, 0.55);
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* ─── Ambient Glows ─── */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            animation: floatGlow 18s ease-in-out infinite alternate;
+        }
+        body::before {
+            width: 600px; height: 600px;
+            background: rgba(0, 242, 254, 0.08);
+            top: -200px; left: -200px;
+        }
+        body::after {
+            width: 550px; height: 550px;
+            background: rgba(168, 85, 247, 0.08);
+            bottom: -200px; right: -200px;
+            animation-delay: -9s;
+        }
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 40px) scale(1.15); }
+        }
+
+        /* ─── Container Principal ─── */
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px 32px 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Top Bar ─── */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 16, 34, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px 28px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .btn-config {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: 'Space Mono', monospace;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        .btn-config:hover {
+            color: var(--cyan);
+            border-color: var(--cyan);
+            background: rgba(0, 242, 254, 0.08);
+        }
+        .btn-config svg { width: 16px; height: 16px; }
+
+        .game-header-title {
+            text-align: center;
+        }
+        .game-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            display: block;
+        }
+        .game-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff 40%, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 4px 12px;
+        }
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .stat-val {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+        .stat-val.highlight { color: var(--cyan); }
+
+        /* ─── Área do Tabuleiro ─── */
+        .board-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .puzzle-wrapper {
+            position: relative;
+            background: rgba(8, 12, 26, 0.9);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 14px;
+            box-shadow:
+                0 0 0 1px rgba(0, 242, 254, 0.1),
+                0 25px 70px rgba(0, 0, 0, 0.7),
+                0 0 50px rgba(0, 242, 254, 0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        .puzzle-grid {
+            display: grid;
+            gap: 6px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* ─── Peças do Quebra-Cabeça ─── */
+        .puzzle-tile {
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puzzle-tile:hover {
+            transform: scale(1.03);
+            border-color: var(--cyan);
+            box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
+            z-index: 5;
+        }
+
+        .puzzle-tile.selected {
+            transform: scale(1.08);
+            border-color: #fff;
+            box-shadow: 0 0 0 3px var(--cyan), 0 0 25px rgba(0, 242, 254, 0.8);
+            z-index: 10;
+            animation: pulseTile 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseTile {
+            0% { box-shadow: 0 0 0 3px var(--cyan), 0 0 20px rgba(0, 242, 254, 0.6); }
+            100% { box-shadow: 0 0 0 4px #fff, 0 0 32px rgba(0, 242, 254, 0.9); }
+        }
+
+        .puzzle-tile.correct {
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .tile-number {
+            position: absolute;
+            top: 6px; left: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--cyan);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            pointer-events: none;
+        }
+
+        .correct-badge {
+            position: absolute;
+            bottom: 6px; right: 6px;
+            background: rgba(16, 185, 129, 0.85);
+            color: white;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        /* ─── Barra de Progresso e Ações Inferiores ─── */
+        .bottom-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            background: rgba(12, 16, 34, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px 28px;
+            backdrop-filter: blur(16px);
+            margin-top: 24px;
+        }
+
+        .progress-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-dim);
+        }
+        .progress-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan-deep), var(--emerald));
+            border-radius: 8px;
+            transition: width 0.35s ease;
+            box-shadow: 0 0 12px var(--cyan);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+            box-shadow: 0 4px 18px rgba(0, 242, 254, 0.3);
+            color: var(--cyan);
+        }
+        .btn-action svg { width: 18px; height: 18px; }
+
+        /* ─── Modal Espiar Imagem ─── */
+        .peek-modal {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .peek-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .peek-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .peek-card img {
+            max-width: 600px;
+            max-height: 600px;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: block;
+            margin: 0 auto 16px;
+        }
+        .peek-close-hint {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* ─── Modal Vitória ─── */
+        .win-modal {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .win-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .win-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 48px 52px;
+            text-align: center;
+            max-width: 520px;
+            width: 90%;
+            position: relative;
+            box-shadow:
+                0 0 0 1px rgba(0, 242, 254, 0.2),
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                0 0 60px rgba(0, 242, 254, 0.25);
+            animation: winBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes winBounce {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .win-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald), var(--purple));
+            border-radius: 28px 28px 0 0;
+        }
+        .win-trophy {
+            font-size: 4.2rem;
+            margin-bottom: 16px;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.6));
+        }
+        .win-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff 40%, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .win-subtitle {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+
+        .win-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 34px;
+        }
+        .win-stat-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .win-stat-lbl {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .win-stat-val {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .win-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-win-play {
+            background: linear-gradient(135deg, var(--cyan-deep), var(--cyan));
+            color: #040914;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            padding: 18px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 30px rgba(0, 242, 254, 0.4);
+        }
+        .btn-win-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 242, 254, 0.6);
+        }
+        .btn-win-config {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            padding: 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-win-config:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-layout">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <a href="config-quebra-cabeca.html" class="btn-config">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            Configurações
+        </a>
+
+        <div class="game-header-title">
+            <span class="game-tag">◆ GAME CENTER ◆</span>
+            <h1 class="game-name">QUEBRA-CABEÇA</h1>
+        </div>
+
+        <div class="stats-group">
+            <div class="stat-item">
+                <span class="stat-label">Tempo</span>
+                <span class="stat-val highlight" id="stat-time">00:00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Movimentos</span>
+                <span class="stat-val" id="stat-moves">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Acertos</span>
+                <span class="stat-val" id="stat-matches">0 / 9</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabuleiro -->
+    <main class="board-container">
+        <div class="puzzle-wrapper">
+            <div class="puzzle-grid" id="puzzle-grid">
+                <!-- Peças geradas via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Bar -->
+    <footer class="bottom-bar">
+        <div class="progress-box">
+            <div class="progress-info">
+                <span>Progresso do Encaixe</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn-action" id="btn-peek" style="display: none;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Espiar Imagem
+            </button>
+
+            <button class="btn-action" id="btn-shuffle">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                </svg>
+                Embaralhar
+            </button>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Modal Espiar Imagem -->
+<div class="peek-modal" id="peek-modal">
+    <div class="peek-card">
+        <img id="peek-img" src="" alt="Imagem Completa">
+        <p class="peek-close-hint">Toque em qualquer lugar para fechar</p>
+    </div>
+</div>
+
+<!-- Modal Vitória -->
+<div class="win-modal" id="win-modal">
+    <div class="win-box">
+        <span class="win-trophy">🏆</span>
+        <h2 class="win-title">ESPETACULAR!</h2>
+        <p class="win-subtitle">Você montou o quebra-cabeça com maestria!</p>
+
+        <div class="win-stats-grid">
+            <div class="win-stat-card">
+                <span class="win-stat-lbl">Tempo Total</span>
+                <span class="win-stat-val" id="win-time">00:45</span>
+            </div>
+            <div class="win-stat-card">
+                <span class="win-stat-lbl">Movimentos</span>
+                <span class="win-stat-val" id="win-moves">14</span>
+            </div>
+        </div>
+
+        <div class="win-btns">
+            <button class="btn-win-play" id="btn-play-again">Jogar Novamente</button>
+            <a href="config-quebra-cabeca.html" class="btn-win-config">Configurar Novo Quebra-Cabeça</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="quebra-cabeca-game.js"></script>
+</body>
+</html>

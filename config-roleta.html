@@ -170,7 +170,7 @@
                             <label class="color-label">Duração do Evento:</label>
                             <div class="duration-inputs">
                                 <input type="number" id="input-event-hours" class="prize-name-input duration-input"
-                                    min="0" max="12" value="2" aria-label="Horas">
+                                    min="0" max="24" value="2" aria-label="Horas">
                                 <span class="duration-sep">h</span>
                                 <input type="number" id="input-event-minutes" class="prize-name-input duration-input"
                                     min="0" max="59" value="30" aria-label="Minutos">
@@ -180,7 +180,7 @@
                         <div class="config-form-group">
                             <label for="input-event-total-prizes" class="color-label">Total de Prêmios a Distribuir:</label>
                             <input type="number" id="input-event-total-prizes" class="prize-name-input"
-                                min="1" max="500" value="15" aria-label="Total de prêmios">
+                                min="1" max="1000" value="15" aria-label="Total de prêmios">
                         </div>
                     </div>
                     <div class="event-timer-status" id="event-timer-status">
@@ -191,8 +191,17 @@
                         <button class="btn btn-primary" id="btn-start-event" aria-label="Iniciar controle de tempo do evento">
                             ▶ Iniciar Evento
                         </button>
+                        <button class="btn btn-primary" id="btn-restart-event" aria-label="Reiniciar controle de tempo com novos valores" style="display:none;">
+                            🔄 Reiniciar Evento
+                        </button>
+                        <button class="btn btn-secondary" id="btn-reset-event" aria-label="Zerar evento atual">
+                            🔄 Zerar Evento
+                        </button>
                         <button class="btn btn-secondary" id="btn-stop-event" aria-label="Encerrar controle de tempo do evento" style="display:none;">
-                            ⏹ Encerrar Evento
+                            ⏹ Encerrar
+                        </button>
+                        <button class="btn btn-secondary" id="btn-random-event" aria-label="Preencher tempo e prêmios aleatoriamente" title="Gerar tempo e prêmios aleatórios">
+                            🎲 Aleatório
                         </button>
                     </div>
                 </div>
